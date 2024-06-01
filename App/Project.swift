@@ -11,7 +11,9 @@ let project = Project(
       destinations: .iOS,
       product: .app,
       bundleId: "\(Environment.bundleId)",
-      infoPlist: .default,
+      infoPlist: .extendingDefault(with: [
+        "UILaunchStoryboardName": "Launch Screen.storyboard"
+      ]),
       sources: ["Sources/**"],
       resources: ["Resources/**"],
 //      scripts: [.swiftLint],
