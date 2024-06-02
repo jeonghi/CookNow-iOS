@@ -7,9 +7,17 @@
 
 import ProjectDescription
 
-let workspace = Workspace(
-  name: "CookNow",
-  projects: [
-    "App"
-  ]
-)
+let workspace = Workspace.create()
+
+extension Workspace {
+  static func create() -> Workspace {
+    Workspace(
+      name: "CookNow",
+      projects: [
+        "App",
+        "Feature/**",
+        "UI/**"
+      ]
+    )
+  }
+}
