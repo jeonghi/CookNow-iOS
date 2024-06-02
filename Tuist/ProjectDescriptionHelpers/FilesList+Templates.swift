@@ -9,6 +9,9 @@ import ProjectDescription
 
 extension ProjectDescription.SourceFilesList {
   static let sources: SourceFilesList = "Sources/**"
-  static let resources: SourceFilesList = "Resources/**"
   static let tests: SourceFilesList = "Tests/**"
+}
+
+extension ProjectDescription.ResourceFileElements {
+  static let resources: ResourceFileElements = ["Resources/**"]
 }
