@@ -7,8 +7,9 @@
 
 import ProjectDescription
 
-public enum Environment {
-  public static let organizationName = "com.jeonghi"
-  public static let appName = "CookNow"
-  public static let bundleId = "\(organizationName).\(appName)"
+public extension Environment {
+  static let organizationName = "com.jeonghi"
+  static let appName = "CookNow"
+  static let bundleId = "\(organizationName).\(appName)"
+  static let forPreview = true
 }
