@@ -59,21 +59,3 @@ public struct ColorAsset {
   }
 }
 
-public extension ColorAsset {
-  /// Convert to SwiftUI's Color
-  func toColor() -> Color {
-    return Color(red: red, green: green, blue: blue, opacity: alpha)
-  }
-  
-  /// Convert to UIKit's UIColor
-  func toUIColor() -> UIColor {
-    return UIColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(alpha))
-  }
-  
-#if canImport(AppKit)
-  /// Convert to AppKit's NSColor (only if AppKit is available, e.g. macOS platform)
-  func toNSColor() -> NSColor {
-    return NSColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(alpha))
-  }
-#endif
-}
