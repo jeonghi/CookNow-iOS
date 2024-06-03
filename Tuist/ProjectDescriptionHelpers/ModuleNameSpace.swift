@@ -24,5 +24,6 @@ public extension ModuleNameSpace {
   
   enum UI: String {
     case DesignSystem = "DesignSystem"
+    case DesignSystemFoundation = "DesignSystemFoundation"
   }
 }
