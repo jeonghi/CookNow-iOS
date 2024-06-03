@@ -1,7 +1,7 @@
 project:
 	tuist clean
 	tuist install
-	tuist generate --no-open &&  tuist open CookNow.xcworkspace
+	tuist generate --no-open &&  open CookNow.xcworkspace
 
 open: 
 	tuist generate --no-open &&  open CookNow.xcworkspace
