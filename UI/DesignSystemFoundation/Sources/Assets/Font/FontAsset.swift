@@ -5,8 +5,7 @@
 //  Created by 쩡화니 on 6/3/24.
 //
 
-import UIKit
-import SwiftUI
+import Foundation
 
 public struct FontAsset {
   
@@ -16,11 +15,16 @@ public struct FontAsset {
   var size: CGFloat
   /// 행간
   var leading: FontAsset.Leading?
+  
   var lineHeight: CGFloat {
     size + (leading?.value ?? 0)
   }
   
-  public init(_ config: FontConfig, size: CGFloat, leading: FontAsset.Leading? = nil) {
+  public init(
+    _ config: FontConfig,
+    size: CGFloat,
+    leading: FontAsset.Leading? = nil
+  ) {
     self.config = config
     self.size = size
     self.leading = leading
@@ -93,35 +97,5 @@ public extension FontAsset {
     var fontPath: String {
       return "\(fontName).\(fileType.rawValue)"
     }
-  }
-}
-
-public extension Font {
-  init(_ asset: FontAsset) {
-    if let bundle = asset.config.bundle {
-      if let url = bundle.url(forResource: asset.config.fontName, withExtension: asset.config.fileType.rawValue),
-         let provider = CGDataProvider(url: url as CFURL),
-         let cgFont = CGFont(provider) {
-        CTFontManagerRegisterGraphicsFont(cgFont, nil)
-      }
-    }
-    
-    self = .custom(asset.config.fontName, size: asset.size, relativeTo: .body)
-  }
-}
-
-public extension UIFont {
-  convenience init?(_ asset: FontAsset) {
-    if let bundle = asset.config.bundle {
-      if let url = bundle.url(forResource: asset.config.fontName, withExtension: asset.config.fileType.rawValue),
-         let data = try? Data(contentsOf: url),
-         let provider = CGDataProvider(data: data as CFData),
-         let cgFont = CGFont(provider) {
-        CTFontManagerRegisterGraphicsFont(cgFont, nil)
-        self.init(name: asset.config.fontName, size: asset.size)
-        return
-      }
-    }
-    return nil
   }
 }
