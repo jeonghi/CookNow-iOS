@@ -5,7 +5,6 @@
 //  Created by 쩡화니 on 6/2/24.
 //
 
-import SwiftUI
 import UIKit
 
 public struct ColorAsset {
@@ -57,5 +56,10 @@ public struct ColorAsset {
   public func with(alpha: Double) -> ColorAsset {
     return ColorAsset(red: self.red, green: self.green, blue: self.blue, alpha: alpha)
   }
+}
+
+public extension ColorAsset {
+  static let white = ColorAsset(hex: "#FFFFFF")
+  static let black = ColorAsset(hex: "#000000")
 }
 
