@@ -1,6 +1,6 @@
 project:
 	tuist clean
-	tuist fetch
+	tuist install
 	tuist generate --no-open &&  open CookNow.xcworkspace
 
 open: 

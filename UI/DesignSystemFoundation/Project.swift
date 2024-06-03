@@ -9,10 +9,5 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project.makeFramework(
-  name: ModuleNameSpace.Feature.Onboading.rawValue,
-  dependencies: [
-    .Project.Protocols,
-    .Project.DesignSystem
-  ]
+  name: ModuleNameSpace.UI.DesignSystemFoundation.rawValue
 )
-
