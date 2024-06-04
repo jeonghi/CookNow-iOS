@@ -8,7 +8,10 @@
 import DesignSystemFoundation
 
 public extension ImageAsset {
-  
+  static let onboardingBackground = ImageAsset("onboarding_bg", in: .module, format: .image)
+  static let onboardingLogo = ImageAsset("onboarding_logo", in: .module, format: .image)
+  static let appleLogin = ImageAsset("apple_login", in: .module, format: .image)
+  static let googleLogin = ImageAsset("google_login", in: .module, format: .image)
 }
 
 #if(DEBUG) && canImport(SwiftUI)
