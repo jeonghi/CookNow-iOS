@@ -30,7 +30,7 @@ public struct ImageAsset {
   }
 }
 
-extension ImageAsset.Format {
+public extension ImageAsset.Format {
   static let image = ImageAsset.Format(fileExtension: "assets") {
     guard let image = UIImage(named: $0.named, in: $0.bundle, with: nil) else {
       fatalError("\($0.named).assets does not exist in Bundle:\($0.bundle)")
