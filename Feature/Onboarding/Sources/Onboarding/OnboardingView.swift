@@ -7,6 +7,7 @@
 
 import SwiftUI
 import DesignSystem
+import DesignSystemFoundation
 
 // MARK: Properties
 struct OnboardingView {
@@ -57,18 +58,18 @@ extension OnboardingView {
   
   /// 배경
   private var background: some View {
-    Image(.onboardingBg)
+    Image.asset(.onboardingBackground)
       .resizable()
       .renderingMode(.original)
       .aspectRatio(contentMode: .fill)
       .background(
-        Color(asset: DesignSystemAsset.bg300)
+        Color.asset(.bgMain)
       )
   }
   
   /// 로고
   private var logo: some View {
-    Image(.onboardingLogo)
+    Image.asset(.onboardingLogo)
       .resizable()
       .renderingMode(.original)
       .aspectRatio(contentMode: .fit)
@@ -79,21 +80,17 @@ extension OnboardingView {
   private var title: some View {
     Text("쿡 나우")
       .font(
-        DesignSystemFontFamily
-          .Pretendard
-          .bold
-          .swiftUIFont(size: 39)
+        FontAsset(.bold, size: 39, leading: .custom(47)).toFont()
       )
+      .foregroundStyle(Color.asset(.black))
   }
   
   private var socialSignUpLabel: some View {
     Text("소셜 계정으로 간편 가입하기")
       .font(
-        DesignSystemFontFamily
-          .Pretendard
-          .medium
-          .swiftUIFont(size: 14)
+        FontAsset(.regular, size: 14, leading: .custom(17)).toFont()
       )
+      .foregroundStyle(Color.asset(.black))
   }
   
   private var socialSignUpButtonStack: some View {
@@ -122,9 +119,9 @@ extension OnboardingView {
     var iconImage: Image {
       switch self {
       case .apple:
-        return Image(.appleLogin)
+        return .asset(.appleLogin)
       case.google:
-        return Image(.googleLogin)
+        return .asset(.googleLogin)
       }
     }
     
