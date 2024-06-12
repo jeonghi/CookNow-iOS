@@ -17,9 +17,14 @@ public extension ColorAsset {
   static let clear = white.with(alpha: 0)
   
   // MARK: Primary
+  static let primary100 = ColorAsset(named: "primary100", bundle: .module)
   static let primary200 = ColorAsset(named: "primary200", bundle: .module)
+  static let primary300 = ColorAsset(named: "primary300", bundle: .module)
+  static let primary400 = ColorAsset(named: "primary400", bundle: .module)
   static let primary500 = ColorAsset(named: "primary500", bundle: .module)
+  static let primary600 = ColorAsset(named: "primary600", bundle: .module)
   static let primary700 = ColorAsset(named: "primary700", bundle: .module)
+  static let primary800 = ColorAsset(named: "primary800", bundle: .module)
 }
 
 #if canImport(SwiftUI)
