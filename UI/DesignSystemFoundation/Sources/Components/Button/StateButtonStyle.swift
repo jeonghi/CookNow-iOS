@@ -7,9 +7,28 @@
 
 import SwiftUI
 
+public extension View {
+  func isProgressing(_ isProgressing: Bool) -> some View {
+    self
+      .environment(\.isProgressing, isProgressing)
+  }
+}
+
+private struct ProgressKey: EnvironmentKey {
+  public static let defaultValue: Bool = false
+}
+
+private extension EnvironmentValues {
+    var isProgressing: Bool {
+        get { self[ProgressKey.self] }
+        set { self[ProgressKey.self] = newValue }
+    }
+}
+
 public struct StateButtonStyle {
   
   @Environment(\.isEnabled) var isEnabled: Bool
+  @Environment(\.isProgressing) var isProgressing: Bool
   
   var buttonSize: ButtonSize
   var configurations: [ButtonState: StateButtonConfiguration] = [:]
@@ -34,24 +53,50 @@ extension StateButtonStyle: ButtonStyle {
     
     let currentState: ButtonState = {
       if(isEnabled) {
+        // 누른 상태
         if(configuration.isPressed) {
           return .pressed
-        }else {
+        }else { // 일반 상태
           return .normal
         }
-      } else {
+      } else { // 비활성화 상태
+        if(isProgressing) {
+          return .progress
+        }
         return .disabled
       }
     }()
     
-    let config = configurations[currentState]
+    let config: StateButtonConfiguration = configurations[currentState] ?? .default
+    
     return configuration.label
       .kerning(0.5)
-      .font(config?.fontConfig.toFont())
+      .font(config.fontConfig?.toFont())
       .padding(10)
-      .foregroundStyle(config?.foreground.toColor() ?? ColorAsset.black.toColor())
-      .frame(width: buttonSize.width, height: buttonSize.height)
-      .background(config?.background.toColor() ?? ColorAsset.white.toColor())
-      .clipShape(RoundedRectangle(cornerRadius: 6))
+      .foregroundStyle(
+        currentState == .progress ? Color.asset(.clear) : config.foreground.toColor()
+      )
+      .frame(
+        width: buttonSize.width,
+        height: buttonSize.height
+      )
+      .frame(maxWidth: .infinity)
+      .background(
+        RoundedRectangle(cornerRadius: 6)
+          .fill(config.background.toColor())
+      )
+      .overlay(
+        ZStack {
+          RoundedRectangle(cornerRadius: 6)
+            .stroke(
+              config.border.toColor(),
+              lineWidth: 1
+            )
+          if(currentState == .progress) {
+            ProgressView()
+              .tint(config.foreground.toColor())
+          }
+        }
+      )
   }
 }

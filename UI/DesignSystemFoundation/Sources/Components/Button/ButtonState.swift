@@ -11,4 +11,5 @@ public enum ButtonState {
   case normal
   case pressed
   case disabled
+  case progress
 }
