@@ -16,7 +16,8 @@ public extension StateButtonStyle {
         StateButtonConfiguration(
           fontConfig: .bodyBold,
           foreground: .white,
-          background: .primary500
+          background: .primary500,
+          border: .clear
         ),
         for: .normal
       )
@@ -24,7 +25,8 @@ public extension StateButtonStyle {
         StateButtonConfiguration(
           fontConfig: .bodyBold,
           foreground: .white,
-          background: .primary700
+          background: .primary700,
+          border: .clear
         ),
         for: .pressed
       )
@@ -32,9 +34,19 @@ public extension StateButtonStyle {
         StateButtonConfiguration(
           fontConfig: .bodyBold,
           foreground: .white,
-          background: .primary200
+          background: .primary200,
+          border: .clear
         ),
         for: .disabled
+      )
+      .style(
+        StateButtonConfiguration(
+          fontConfig: nil,
+          foreground: .white,
+          background: .primary500,
+          border: .clear
+        ),
+        for: .progress
       )
   }
   
@@ -43,27 +55,39 @@ public extension StateButtonStyle {
     StateButtonStyle(buttonSize: buttonSize)
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary500,
-          background: .clear
+          background: .clear,
+          border: .primary500
         ),
         for: .normal
       )
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary700,
-          background: .clear
+          background: .clear,
+          border: .primary700
         ),
         for: .pressed
       )
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary200,
-          background: .clear
+          background: .clear,
+          border: .primary200
         ),
         for: .disabled
+      )
+      .style(
+        StateButtonConfiguration(
+          fontConfig: .bodyBold,
+          foreground: .primary500,
+          background: .clear,
+          border: .primary500
+        ),
+        for: .progress
       )
   }
   
@@ -72,27 +96,39 @@ public extension StateButtonStyle {
     StateButtonStyle(buttonSize: buttonSize)
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary500,
-          background: .white
+          background: .white,
+          border: .gray300
         ),
         for: .normal
       )
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary700,
-          background: .white
+          background: .white,
+          border: .gray500
         ),
         for: .pressed
       )
       .style(
         StateButtonConfiguration(
-          fontConfig: .title1,
+          fontConfig: .bodyBold,
           foreground: .primary200,
-          background: .white
+          background: .white,
+          border: .gray100
         ),
         for: .disabled
+      )
+      .style(
+        StateButtonConfiguration(
+          fontConfig: .bodyBold,
+          foreground: .primary500,
+          background: .white,
+          border: .gray300
+        ),
+        for: .progress
       )
   }
 }
@@ -100,18 +136,55 @@ public extension StateButtonStyle {
 #if(DEBUG) && (canImport(SwiftUI))
 import SwiftUI
 #Preview {
-  ScrollView {
+  VStack(alignment: .leading) {
+    
+    // MARK: Primary
+    Text("Primary")
     Button(action: {}) {
       Text("Primary btn")
     }.buttonStyle(StateButtonStyle.primary(.default))
       .frame(maxWidth: .infinity)
+    
     Button(action: {}) {
       Text("Primary btn")
     }.buttonStyle(StateButtonStyle.primary(.default))
+      .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+    
     Button(action: {}) {
       Text("Primary btn")
     }.buttonStyle(StateButtonStyle.primary(.default))
+      .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+      .isProgressing(true)
+    
+    
+    Text("Secondary")
+    Button(action: {}) {
+      Text("Secondary btn")
+    }.buttonStyle(StateButtonStyle.secondary(.default))
+    Button(action: {}) {
+      Text("Secondary btn")
+    }.buttonStyle(StateButtonStyle.secondary(.default))
       .disabled(true)
+    Button(action: {}) {
+      Text("Secondary btn")
+    }.buttonStyle(StateButtonStyle.secondary(.default))
+      .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+      .isProgressing(true)
+    
+    Text("Tertiary")
+    Button(action: {}) {
+      Text("Tertiary btn")
+    }.buttonStyle(StateButtonStyle.tertiary(.default))
+    Button(action: {}) {
+      Text("Tertiary btn")
+    }.buttonStyle(StateButtonStyle.tertiary(.default))
+      .disabled(true)
+    Button(action: {}) {
+      Text("Tertiary btn")
+    }.buttonStyle(StateButtonStyle.tertiary(.default))
+      .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+      .isProgressing(true)
   }
+  .padding(.horizontal, 20)
 }
 #endif
