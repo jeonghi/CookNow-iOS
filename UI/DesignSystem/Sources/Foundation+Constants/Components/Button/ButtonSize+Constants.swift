@@ -8,5 +8,5 @@
 import DesignSystemFoundation
 
 public extension ButtonSize {
-  static let `default` = ButtonSize(width: 157.5, height: 48)
+  static let `default` = ButtonSize(width: .infinity, height: 48)
 }

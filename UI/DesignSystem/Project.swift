@@ -5,6 +5,8 @@ let project = Project.makeFramework(
   name: ModuleNameSpace.UI.DesignSystem.rawValue,
   dependencies: [
     .Project.DesignSystemFoundation,
-    .external(name: "FloatingButton", condition: nil)
+    .Project.Commmon,
+    .external(name: "FloatingButton", condition: nil),
+    .external(name: "FSCalendar", condition: nil),
   ]
 )

@@ -64,7 +64,8 @@ public extension Project {
   
   /// Library를 만드는 메서드
   static func makeLibrary(
-    name moduleName: String
+    name moduleName: String,
+    dependencies: [TargetDependency] = []
   ) -> Project {
     Project(
       name: moduleName,
@@ -77,7 +78,7 @@ public extension Project {
           bundleId: "\(Environment.bundleId)",
           infoPlist: .default,
           sources: ["Sources/**"],
-          dependencies: [],
+          dependencies: dependencies,
           settings: .targetSettings
         )
       ],

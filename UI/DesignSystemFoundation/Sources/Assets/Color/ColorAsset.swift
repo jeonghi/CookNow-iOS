@@ -61,5 +61,6 @@ public struct ColorAsset {
 public extension ColorAsset {
   static let white = ColorAsset(hex: "#FFFFFF")
   static let black = ColorAsset(hex: "#000000")
+  static let clear = white.with(alpha: 0)
 }
 

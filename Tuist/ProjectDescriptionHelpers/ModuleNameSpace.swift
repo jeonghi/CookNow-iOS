@@ -19,7 +19,7 @@ public extension ModuleNameSpace {
   }
   
   enum Common: String {
-    case Protocols = "Protocols"
+    case Common = "Common"
   }
   
   enum UI: String {

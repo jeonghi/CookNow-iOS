@@ -17,9 +17,9 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("Feature/Onboarding"),
     condition: nil
   )
-  static let Protocols = TargetDependency.project(
-    target: ModuleNameSpace.Common.Protocols.rawValue,
-    path: .relativeToRoot("Common/Protocols"),
+  static let Commmon = TargetDependency.project(
+    target: ModuleNameSpace.Common.Common.rawValue,
+    path: .relativeToRoot("Common"),
     condition: nil
   )
   static let DesignSystem = TargetDependency.project(
