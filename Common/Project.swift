@@ -9,5 +9,9 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project.makeLibrary(
-  name: ModuleNameSpace.Common.Protocols.rawValue
+  name: ModuleNameSpace.Common.Common.rawValue,
+  dependencies: [
+    .external(name: "Then", condition: nil),
+    .external(name: "SnapKit", condition: nil)
+  ]
 )

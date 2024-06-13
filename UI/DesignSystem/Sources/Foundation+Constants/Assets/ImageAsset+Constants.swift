@@ -12,6 +12,10 @@ public extension ImageAsset {
   static let onboardingLogo = ImageAsset("onboarding_logo", in: .module, format: .image)
   static let appleLogin = ImageAsset("apple_login", in: .module, format: .image)
   static let googleLogin = ImageAsset("google_login", in: .module, format: .image)
+  
+  // MARK: Icon
+  static let leftChevron = ImageAsset("left_chevron", in: .module, format: .image)
+  static let rightChevron = ImageAsset("right_chevron", in: .module, format: .image)
 }
 
 #if(DEBUG) && canImport(SwiftUI)

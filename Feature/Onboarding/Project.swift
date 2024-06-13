@@ -11,7 +11,7 @@ import ProjectDescriptionHelpers
 let project = Project.makeFramework(
   name: ModuleNameSpace.Feature.Onboading.rawValue,
   dependencies: [
-    .Project.Protocols,
+    .Project.Commmon,
     .Project.DesignSystem
   ]
 )

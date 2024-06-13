@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine
-import Protocols
+import Common
 
 public final class OnboardingViewModel: BaseViewModelType {
   
