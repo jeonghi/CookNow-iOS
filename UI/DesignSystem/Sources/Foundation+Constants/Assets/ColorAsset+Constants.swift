@@ -14,6 +14,7 @@ public extension ColorAsset {
   static let bg100 = ColorAsset(named: "bg100", bundle: .module)
   static let bg200 = ColorAsset(named: "bg200", bundle: .module)
   static let bgMain = ColorAsset(named: "bg300", bundle: .module)
+  static let overlayBackground = ColorAsset.black.with(alpha: 0.7)
   
   // MARK: Primary
   static let primary100 = ColorAsset(named: "primary100", bundle: .module)
