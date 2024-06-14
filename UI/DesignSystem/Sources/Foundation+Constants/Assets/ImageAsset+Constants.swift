@@ -16,6 +16,9 @@ public extension ImageAsset {
   // MARK: Icon
   static let leftChevron = ImageAsset("left_chevron", in: .module, format: .image)
   static let rightChevron = ImageAsset("right_chevron", in: .module, format: .image)
+  
+  static let magnifyingglass = ImageAsset("magnifyingglass", in: .module, format: .image)
+  static let xmark = ImageAsset("xmark", in: .module, format: .image)
 }
 
 #if(DEBUG) && canImport(SwiftUI)
