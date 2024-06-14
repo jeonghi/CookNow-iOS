@@ -28,7 +28,9 @@ public extension ColorAsset {
   
   // MARK: Gray
   static let gray100 = ColorAsset(named: "gray100", bundle: .module)
+  static let gray200 = ColorAsset(named: "gray200", bundle: .module)
   static let gray300 = ColorAsset(named: "gray300", bundle: .module)
+  static let gray400 = ColorAsset(named: "gray400", bundle: .module)
   static let gray500 = ColorAsset(named: "gray500", bundle: .module)
   static let gray600 = ColorAsset(named: "gray600", bundle: .module)
   static let gray800 = ColorAsset(named: "gray800", bundle: .module)
