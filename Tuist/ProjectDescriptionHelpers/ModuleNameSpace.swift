@@ -26,4 +26,8 @@ public extension ModuleNameSpace {
     case DesignSystem = "DesignSystem"
     case DesignSystemFoundation = "DesignSystemFoundation"
   }
+  
+  enum Domain: String {
+    case Domain = "Domain"
+  }
 }

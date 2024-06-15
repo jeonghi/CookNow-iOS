@@ -16,7 +16,8 @@ extension Workspace {
       projects: [
         "App",
         "Feature/**",
-        "UI/**"
+        "UI/**",
+        "Domain/**"
       ]
     )
   }
