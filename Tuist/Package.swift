@@ -34,6 +34,10 @@ let package = Package(
       .package(
         url: "https://github.com/exyte/PopupView.git",
         from: "3.0.0"
+      ),
+      .package(
+        url: "https://github.com/onevcat/Kingfisher.git",
+        from: "7.12.0"
       )
     ]
 )
