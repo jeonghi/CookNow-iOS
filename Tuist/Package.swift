@@ -33,7 +33,7 @@ let package = Package(
       ),
       .package(
         url: "https://github.com/exyte/PopupView.git",
-        from: "2.10.1"
+        from: "3.0.0"
       )
     ]
 )
