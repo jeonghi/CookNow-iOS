@@ -44,6 +44,11 @@ public extension ColorAsset {
   static let info300 = ColorAsset(named: "info300", bundle: .module)
   static let info500 = ColorAsset(named: "info500", bundle: .module)
   static let info700 = ColorAsset(named: "info700", bundle: .module)
+  
+  // MARK: Warning
+  static let warning300 = ColorAsset(named: "warning300", bundle: .module)
+  static let warning500 = ColorAsset(named: "warning500", bundle: .module)
+  static let warning700 = ColorAsset(named: "warning700", bundle: .module)
 }
 
 #if canImport(SwiftUI)
