@@ -1,0 +1,129 @@
+name: Issue Templates
+
+# 이슈 유형 선택 템플릿
+issue_type_selection:
+  name: 이슈 유형 선택
+  about: 생성할 이슈의 유형을 선택합니다.
+  title: '[이슈 유형 선택]'
+
+  # 이슈 유형 선택 폼
+  body:
+    - type: dropdown
+      id: issue-type
+      attributes:
+        label: 이슈 유형 선택
+        options:
+          - label: 버그 리포트
+            value: bug_report
+          - label: 기능 요청
+            value: feature_request
+          - label: 질문
+            value: question
+          - label: 기타
+            value: custom_issue
+
+# 버그 리포트 템플릿
+bug_report:
+  name: 버그 리포트
+  about: 발견한 버그를 보고합니다.
+  title: '[버그] '
+
+  # 필수 입력 사항
+  labels:
+    - 버그
+  assignees:
+    - 
+
+  # 본문 (선택 사항)
+  body:
+    - type: textarea
+      id: bug-description
+      attributes:
+        label: 버그 설명
+        placeholder: 발생한 버그에 대해 상세히 설명해 주세요.
+      validations:
+        required: true
+
+    - type: textarea
+      id: reproduction-steps
+      attributes:
+        label: 재현 단계
+        placeholder: 버그를 재현하기 위한 단계를 적어주세요.
+      validations:
+        required: true
+
+    - type: textarea
+      id: expected-behavior
+      attributes:
+        label: 예상 동작
+        placeholder: 어떻게 동작해야 하는지 설명해 주세요.
+      validations:
+        required: true
+
+# 기능 요청 템플릿
+feature_request:
+  name: 기능 요청
+  about: 새로운 기능이나 개선 제안을 합니다.
+  title: '[기능 요청] '
+
+  labels:
+    - 기능 요청
+  assignees:
+    -
+
+  body:
+    - type: textarea
+      id: feature-description
+      attributes:
+        label: 제안하는 기능 설명
+        placeholder: 새로운 기능이나 개선할 점에 대해 설명해 주세요.
+      validations:
+        required: true
+
+    - type: textarea
+      id: use-case
+      attributes:
+        label: 사용 사례
+        placeholder: 제안하는 기능이 사용될 상황에 대해 설명해 주세요.
+      validations:
+        required: true
+
+# 질문 템플릿
+question:
+  name: 질문
+  about: 기술적인 질문이나 도움 요청을 합니다.
+  title: '[질문] '
+
+  labels:
+    - 질문
+  assignees:
+    -
+
+  body:
+    - type: textarea
+      id: question-detail
+      attributes:
+        label: 질문 내용
+        placeholder: 구체적으로 질문하고자 하는 내용을 적어주세요.
+      validations:
+        required: true
+
+# 기타 템플릿
+custom_issue:
+  name: 기타
+  about: 기타 유형의 이슈를 작성합니다.
+  title: '[기타] '
+
+  labels:
+    - 기타
+  assignees:
+    -
+
+  body:
+    - type: textarea
+      id: other-detail
+      attributes:
+        label: 상세 내용
+        placeholder: 기타 사항이나 추가 설명을 적어주세요.
+      validations:
+        required: true
