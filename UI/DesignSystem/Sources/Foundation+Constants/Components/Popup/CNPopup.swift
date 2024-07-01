@@ -33,6 +33,7 @@ public extension View {
           .type(.toast)
           .position(.center)
           .dragToDismiss(true)
+          .closeOnTap(false)
           .backgroundColor(Color.asset(.overlayBackground))
       }
   }
