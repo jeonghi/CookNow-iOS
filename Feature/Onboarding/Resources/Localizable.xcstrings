@@ -1,0 +1,41 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "app_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CookNow"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쿡 나우"
+          }
+        }
+      }
+    },
+    "signup_with_social" : {
+      "comment" : "Localizable.strings\n  Onboading\n\n  Created by 쩡화니 on 7/2/24.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign up with your social media account"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소셜 계정으로 간편 가입하기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

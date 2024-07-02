@@ -8,6 +8,7 @@
 import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
+import Common
 
 // MARK: Properties
 struct OnboardingView {
@@ -78,15 +79,16 @@ extension OnboardingView {
   
   /// 타이틀
   private var title: some View {
-    Text("쿡 나우")
+    Text("app_name", bundle: .module)
       .font(
         FontAsset(.bold, size: 39, leading: .custom(47)).toFont()
       )
+    
       .foregroundStyle(Color.asset(.black))
   }
   
   private var socialSignUpLabel: some View {
-    Text("소셜 계정으로 간편 가입하기")
+    Text("signup_with_social", bundle: .module)
       .font(
         FontAsset(.regular, size: 14, leading: .custom(17)).toFont()
       )
@@ -132,5 +134,7 @@ extension OnboardingView {
 }
 
 #Preview {
-  OnboardingView()
+  print("signup_with_social".localized)
+  return OnboardingView()
+    .environment(\.locale, .init(identifier: "en"))
 }

@@ -16,6 +16,7 @@ public extension Project {
   ) -> Project {
     Project(
       name: appName,
+      options: .default,
       settings: .projectSettings,
       targets: [
         .target(
@@ -44,6 +45,7 @@ public extension Project {
   ) -> Project {
     Project(
       name: moduleName,
+      options: .default,
       settings: .projectSettings,
       targets: [
         .target(
@@ -69,6 +71,7 @@ public extension Project {
   ) -> Project {
     Project(
       name: moduleName,
+      options: .default,
       settings: .projectSettings,
       targets: [
         .target(
