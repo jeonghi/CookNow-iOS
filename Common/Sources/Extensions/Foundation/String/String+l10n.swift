@@ -1,5 +1,5 @@
 //
-//  String+i18n.swift
+//  String+l10n.swift
 //  Common
 //
 //  Created by 쩡화니 on 7/2/24.
@@ -8,6 +8,7 @@
 import Foundation
 
 public extension String {
+  
   var localized: String {
     return NSLocalizedString(self, comment: "")
   }
