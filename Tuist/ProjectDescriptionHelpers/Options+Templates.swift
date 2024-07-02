@@ -10,8 +10,8 @@ import ProjectDescription
 extension ProjectDescription.Project.Options {
   public static var `default` = Self.options(
     automaticSchemesOptions: .disabled,
-    defaultKnownRegions: ["en", "ko", "Base"],
-    developmentRegion: "Base",
+    defaultKnownRegions: ["en", "ko"],
+    developmentRegion: "en",
     textSettings: .textSettings(usesTabs: false, indentWidth: 2, tabWidth: 2)
   )
 }
