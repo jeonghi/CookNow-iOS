@@ -14,7 +14,7 @@ import DesignSystemFoundation
 public struct CNSearchBar: View {
   
   // MARK: Private properties
-  @State private var _text: String
+  @Binding private var _text: String
   @FocusState private var _textFieldIsFocused: Bool // iOS 15+
   @Environment(\.isEnabled) private var _isEnabled: Bool
   
@@ -36,50 +36,52 @@ public struct CNSearchBar: View {
   
   // MARK: Initializer
   public init(
-    text: String = "",
+    text: Binding<String> = .constant(""),
     placeholder: String = "",
     maxLength: Int = 60
   ) {
-    self._text = text
+    self.__text = text
     self._placeholder = placeholder
     self._maxLength = maxLength
   }
   
   // MARK: Body
   public var body: some View {
-    HStack {
-      Image.asset(.magnifyingglass)
-        .renderingMode(.template)
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 24, height: 24)
-        .foregroundColor(_iconTintColor)
-      TextField(_placeholder, text: $_text)
-        .textFieldStyle(.plain)
-        .tint(_placeholderColor)
-        .font(.asset(.body2))
-        .kerning(-0.6)
-        .disabled(!_isEnabled)
-        .focused($_textFieldIsFocused)
-        .limitInputLength(value: $_text, length: _maxLength)
-      ZStack {
-        if(!_text.isEmpty) {
-          Button(action: {
-            _text = ""
-          }){
-            Image.asset(.xmark)
-              .renderingMode(.template)
-              .resizable()
-              .aspectRatio(contentMode: .fit)
-              .frame(width: 24, height: 24)
-              .foregroundColor(_iconTintColor)
+    ZStack {
+      HStack {
+        Image.asset(.magnifyingglass)
+          .renderingMode(.template)
+          .resizable()
+          .aspectRatio(contentMode: .fit)
+          .frame(width: 24, height: 24)
+          .foregroundColor(_iconTintColor)
+        TextField(_placeholder, text: $_text)
+          .textFieldStyle(.plain)
+          .tint(_placeholderColor)
+          .font(.asset(.body2))
+          .kerning(-0.6)
+          .disabled(!_isEnabled)
+          .focused($_textFieldIsFocused)
+          .limitInputLength(value: $_text, length: _maxLength)
+        ZStack {
+          if(!_text.isEmpty) {
+            Button(action: {
+              _text = ""
+            }){
+              Image.asset(.xmark)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundColor(_iconTintColor)
+            }
           }
         }
+        .frame(width: 24, height: 24)
       }
-      .frame(width: 24, height: 24)
+      .padding(.horizontal, 10)
+      .padding(.vertical, 12)
     }
-    .padding(.horizontal, 10)
-    .padding(.vertical, 12)
     .background(
       _backgroundColor
         .clipShape(RoundedRectangle(cornerRadius: _cornerRadius))
