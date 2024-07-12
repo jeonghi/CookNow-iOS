@@ -12,7 +12,8 @@ let project = Project.makeFramework(
   name: ModuleNameSpace.Feature.Onboading.rawValue,
   dependencies: [
     .Project.Commmon,
-    .Project.DesignSystem
+    .Project.DesignSystem,
+    .ExternalProject.TCA
   ]
 )
 

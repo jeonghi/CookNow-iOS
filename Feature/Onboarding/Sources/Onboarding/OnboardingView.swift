@@ -8,15 +8,32 @@
 import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
+import ComposableArchitecture
 import Common
 
 // MARK: Properties
-struct OnboardingView {
+public struct OnboardingView: BaseFeatureViewType {
   
-  @StateObject var viewModel: OnboardingViewModel
+  public typealias Core = OnboadingCore
+  public let store: StoreOf<Core>
   
-  init(viewModel: OnboardingViewModel = .init()) {
-    _viewModel = StateObject(wrappedValue: viewModel)
+  @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
+  
+  public struct ViewState: Equatable {
+    public init(state: CoreState) {
+      
+    }
+  }
+  
+  public init(
+    _ store: StoreOf<Core> = .init(
+      initialState: OnboadingCore.State()
+    ){
+      OnboadingCore()
+    }
+  ) {
+    self.store = store
+    self.viewStore = ViewStore(store, observe: ViewState.init)
   }
 }
 
@@ -33,7 +50,7 @@ extension OnboardingView {
 // MARK: Layout
 extension OnboardingView: View {
   
-  var body: some View {
+  public var body: some View {
     ZStack {
       VStack(spacing: 0) {
         logo
@@ -43,13 +60,18 @@ extension OnboardingView: View {
           .padding(.top, Metric.socialSignUpLabelTopPadding)
         HStack(spacing: Metric.socialSignUpButtonStackHorizontalSpacing) {
           socialSignUpButtonStack
-        }
+        } // HStack
         .padding(.top, Metric.socialSignUpButtonStackTopPadding)
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } // VStack
+    } // ZStack
+    .frameAllInfinity()
     .background(
       background
+    )
+    .onLifeCycle(
+      onLoad: {},
+      onAppear: {},
+      onDisappear: {}
     )
   }
 }
@@ -83,7 +105,6 @@ extension OnboardingView {
       .font(
         FontAsset(.bold, size: 39, leading: .custom(47)).toFont()
       )
-    
       .foregroundStyle(Color.asset(.black))
   }
   
@@ -134,7 +155,5 @@ extension OnboardingView {
 }
 
 #Preview {
-  print("signup_with_social".localized)
   return OnboardingView()
-    .environment(\.locale, .init(identifier: "en"))
 }

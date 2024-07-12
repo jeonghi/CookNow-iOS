@@ -12,6 +12,7 @@ let project = Project.makeLibrary(
   name: ModuleNameSpace.Common.Common.rawValue,
   dependencies: [
     .external(name: "Then", condition: nil),
-    .external(name: "SnapKit", condition: nil)
+    .external(name: "SnapKit", condition: nil),
+    .ExternalProject.TCA
   ]
 )
