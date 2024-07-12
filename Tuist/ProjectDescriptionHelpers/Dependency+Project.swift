@@ -9,6 +9,7 @@ import ProjectDescription
 
 public extension TargetDependency {
   enum Project {}
+  enum ExternalProject {}
 }
 
 public extension TargetDependency.Project {
@@ -33,4 +34,8 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("UI/DesignSystemFoundation"),
     condition: nil
   )
+}
+
+public extension TargetDependency.ExternalProject {
+  static let TCA = TargetDependency.external(name: "ComposableArchitecture", condition: nil)
 }
