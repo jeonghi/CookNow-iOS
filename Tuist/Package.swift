@@ -42,6 +42,10 @@ let package = Package(
       .package(
         url: "https://github.com/pointfreeco/swift-composable-architecture.git",
         from: "1.11.2"
+      ),
+      .package(
+        url: "https://github.com/airbnb/lottie-ios.git",
+        from: "4.5.0"
       )
     ]
 )

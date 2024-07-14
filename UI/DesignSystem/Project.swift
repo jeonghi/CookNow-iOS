@@ -9,6 +9,7 @@ let project = Project.makeFramework(
     .external(name: "FloatingButton", condition: nil),
     .external(name: "FSCalendar", condition: nil),
     .external(name: "PopupView", condition: nil),
-    .external(name: "Kingfisher", condition: nil)
+    .external(name: "Kingfisher", condition: nil),
+    .ExternalProject.Lottie
   ]
 )

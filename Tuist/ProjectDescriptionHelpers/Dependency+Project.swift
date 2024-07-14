@@ -38,4 +38,6 @@ public extension TargetDependency.Project {
 
 public extension TargetDependency.ExternalProject {
   static let TCA = TargetDependency.external(name: "ComposableArchitecture", condition: nil)
+  
+  static let Lottie = TargetDependency.external(name: "Lottie", condition: nil)
 }
