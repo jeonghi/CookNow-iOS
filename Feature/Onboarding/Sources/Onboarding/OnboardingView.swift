@@ -10,6 +10,7 @@ import DesignSystem
 import DesignSystemFoundation
 import ComposableArchitecture
 import Common
+import Lottie
 
 // MARK: Properties
 public struct OnboardingView: BaseFeatureViewType {
@@ -20,8 +21,9 @@ public struct OnboardingView: BaseFeatureViewType {
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
   public struct ViewState: Equatable {
+    var isAnimating: Bool
     public init(state: CoreState) {
-      
+      isAnimating = state.isAnimating
     }
   }
   
@@ -63,31 +65,44 @@ extension OnboardingView: View {
         } // HStack
         .padding(.top, Metric.socialSignUpButtonStackTopPadding)
       } // VStack
+      .opacity(viewStore.isAnimating ? 0 : 1)
+      .animation(/*@START_MENU_TOKEN@*/.easeIn/*@END_MENU_TOKEN@*/(duration: 0.5), value: !viewStore.isAnimating)
     } // ZStack
     .frameAllInfinity()
+    .onLoad {
+      viewStore.send(.isAnimating(true))
+    }
+    .onAppear {
+      
+    }
     .background(
-      background
+      ZStack {
+        Color.asset(.bgMain)
+        lottieBackground
+      }
     )
-    .onLifeCycle(
-      onLoad: {},
-      onAppear: {},
-      onDisappear: {}
-    )
+    .ignoresSafeArea()
   }
 }
 
 // MARK: Component
 extension OnboardingView {
   
-  /// 배경
-  private var background: some View {
-    Image.asset(.onboardingBackground)
-      .resizable()
-      .renderingMode(.original)
-      .aspectRatio(contentMode: .fill)
-      .background(
-        Color.asset(.bgMain)
+  /// 로티 애니메이션
+  private var lottieBackground: some View {
+    LottieView(
+      animation: LottieAnimation.named(
+        "initial_app_screen",
+        bundle: .module
       )
+    )
+    .animationSpeed(0.2)
+    .playing()
+    .animationDidFinish({ completed in
+      viewStore.send(.isAnimating(false))
+    })
+    .resizable()
+    .ignoresSafeArea(.all)
   }
   
   /// 로고

@@ -22,6 +22,7 @@ extension OnboadingCore: Reducer {
   public struct State {
     var isLoading: Bool = false
     var searchText: String = ""
+    var isAnimating: Bool = true
     
     public init() {
       
@@ -38,6 +39,7 @@ extension OnboadingCore: Reducer {
     case onAppear
     case onDisappear
     case isLoading(Bool)
+    case isAnimating(Bool)
   }
   
   public var body: some ReducerOf<Self> {
@@ -52,6 +54,9 @@ extension OnboadingCore: Reducer {
         return .none
       case .isLoading(let isLoading):
         state.isLoading = isLoading
+        return .none
+      case .isAnimating(let isAnimating):
+        state.isAnimating = isAnimating
         return .none
       }
     }
