@@ -1,5 +1,5 @@
 //
-//  IngedientBoxView.swift
+//  IngredientBoxView.swift
 //  IngredientBox
 //
 //  Created by 쩡화니 on 7/3/24.
@@ -7,44 +7,40 @@
 
 import SwiftUI
 import DesignSystem
+import ComposableArchitecture
 import Common
 
 // MARK: Properties
-public struct IngedientBoxView {
+public struct IngredientBoxView: BaseFeatureViewType {
   
-  struct MockIngredientType: Identifiable, Hashable, Equatable, RawRepresentable {
-    
-    static let mockData: [Self] = [
-      .init("과일"),
-      .init("고기")
-    ]
-    
-    typealias RawValue = String
-    
-    let id: UUID = .init()
-    let name: String
-    var rawValue: RawValue { name }
-    
-    init(_ name: String) {
-      self.name = name
-    }
-    
-    init?(rawValue: RawValue) {
-      self.init(rawValue)
+  public typealias Core = IngredientBoxCore
+  public let store: StoreOf<Core>
+  
+  @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
+  
+  public struct ViewState: Equatable {
+    var searchText: String
+    var selectedType: Core.IngredientType
+    public init(state: CoreState) {
+      searchText = state.searchText
+      selectedType = state.selectedType
     }
   }
   
-  @State var searchText: String = ""
-  @State var selectedType: MockIngredientType = .mockData[0]
-  typealias IngredientType = MockIngredientType
-  
-  public init() {
-    
+  public init(
+    _ store: StoreOf<Core> = .init(
+      initialState: Core.State()
+    ){
+      Core()
+    }
+  ) {
+    self.store = store
+    self.viewStore = ViewStore(store, observe: ViewState.init)
   }
 }
 
 // MARK: Layout
-extension IngedientBoxView: View {
+extension IngredientBoxView: View {
   
   public var body: some View {
     
@@ -78,7 +74,7 @@ extension IngedientBoxView: View {
 }
 
 // MARK: Componet
-extension IngedientBoxView {
+extension IngredientBoxView {
   
   private var _headerSection: some View {
     VStack(spacing: 8) {
@@ -97,7 +93,10 @@ extension IngedientBoxView {
   
   private var _searchBar: some View {
     CNSearchBar(
-      text: $searchText,
+      text: viewStore.binding(
+        get: \.searchText,
+        send: CoreAction.updateSearchText
+      ),
       placeholder: "재료를 입력하세요.",
       maxLength: 30
     )
@@ -115,8 +114,11 @@ extension IngedientBoxView {
   
   private var _ingredientSegmentControl: some View {
     CNSegmentControl(
-      segments: IngredientType.mockData,
-      selected: $selectedType
+      segments: Core.IngredientType.mockData,
+      selected: viewStore.binding(
+        get: \.selectedType,
+        send: CoreAction.selectType
+      )
     )
     .frame(height: 35)
     .frame(maxWidth: .infinity)
@@ -125,7 +127,7 @@ extension IngedientBoxView {
 
 #Preview {
   NavigationView {
-    IngedientBoxView()
+    IngredientBoxView()
       .toolbar {
         ToolbarItemGroup(placement: .principal) {
           Text("재료함")

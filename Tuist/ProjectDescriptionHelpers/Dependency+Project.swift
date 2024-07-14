@@ -18,6 +18,11 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("Feature/Onboarding"),
     condition: nil
   )
+  static let IngredientBox = TargetDependency.project(
+    target: ModuleNameSpace.Feature.IngredientBox.rawValue,
+    path: .relativeToRoot("Feature/IngredientBox"),
+    condition: nil
+  )
   static let Commmon = TargetDependency.project(
     target: ModuleNameSpace.Common.Common.rawValue,
     path: .relativeToRoot("Common"),
