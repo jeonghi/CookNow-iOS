@@ -19,6 +19,9 @@ public extension ImageAsset {
   
   static let magnifyingglass = ImageAsset("magnifyingglass", in: .module, format: .image)
   static let xmark = ImageAsset("xmark", in: .module, format: .image)
+  
+  // MARK: IngredientBox
+  static let ingredientBoxHomeHeaderBackground = ImageAsset("ingredient_box_home_header", in: .module, format: .image)
 }
 
 #if(DEBUG) && canImport(SwiftUI)

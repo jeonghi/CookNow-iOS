@@ -1,0 +1,50 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "ingredient_box_home_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!"
+          }
+        }
+      }
+    },
+    "ingredient_box_home_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재료함"
+          }
+        }
+      }
+    },
+    "ingredient_box_selection_info_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재료 정보 입력"
+          }
+        }
+      }
+    },
+    "ingredient_box_selection_info_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 재료의 상세 정보 입력하기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
