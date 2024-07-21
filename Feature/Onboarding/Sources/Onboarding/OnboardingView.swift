@@ -164,7 +164,7 @@ extension OnboardingView {
       case .apple:
         return .asset(.appleLogin)
         
-      case.google:
+      case .google:
         return .asset(.googleLogin)
       }
     }
