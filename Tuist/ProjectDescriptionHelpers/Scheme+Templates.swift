@@ -17,9 +17,9 @@ extension Scheme {
     scheme(for: .release, target: target, executable: executable)
   }
   
-  public static func beta(for target: String, executable: String? = nil) -> Scheme {
-    scheme(for: .beta, target: target, executable: executable)
-  }
+//  public static func beta(for target: String, executable: String? = nil) -> Scheme {
+//    scheme(for: .beta, target: target, executable: executable)
+//  }
   
   public static func scheme(
     for env: BuildEnvironment,
