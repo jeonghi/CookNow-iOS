@@ -1,4 +1,5 @@
 import SwiftUI
+import Onboading
 
 @main
 struct _App {
@@ -8,7 +9,7 @@ struct _App {
 extension _App: App {
   var body: some Scene {
     WindowGroup {
-      EmptyView()
+      OnboardingView()
     }
   }
 }
