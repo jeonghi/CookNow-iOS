@@ -141,10 +141,15 @@ extension OnboardingView {
   private func makeSocialLoginButton(
     type: SocialLoginType
   ) -> some View {
-    Button(action: {type.closure?()}) {
+    Button(action: {viewStore.send(type.action)}) {
       type.iconImage
-        .resizable()
-        .renderingMode(.original)
+      
+    }.buttonStyle(SocialLoginButtonStyle())
+  }
+  
+  struct SocialLoginButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+      configuration.label
         .aspectRatio(contentMode: .fit)
         .frame(width: 54, height: 54)
     }
@@ -154,17 +159,29 @@ extension OnboardingView {
     case apple
     case google
     
-    var iconImage: Image {
+    private var _iconImage: Image {
       switch self {
       case .apple:
         return .asset(.appleLogin)
+        
       case.google:
         return .asset(.googleLogin)
       }
     }
     
-    var closure: (() -> Void)? {
-      return nil
+    var iconImage: Image {
+      _iconImage
+        .resizable()
+        .renderingMode(.original)
+    }
+    
+    var action: OnboadingCore.Action {
+      switch self {
+      case .apple:
+        return .appleSignInButtonTapped
+      case .google:
+        return .googleSignInButtonTapped
+      }
     }
   }
 }
