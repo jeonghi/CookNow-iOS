@@ -12,6 +12,7 @@ public extension Project {
   /// App을 만드는 메서드
   static func makeApp(
     name appName: String,
+    entitlements: Entitlements? = nil,
     dependencies: [TargetDependency] = []
   ) -> Project {
     Project(
@@ -30,6 +31,7 @@ public extension Project {
           sources: .sources,
           resources: .resources,
     //      scripts: [.swiftLint],
+          entitlements: entitlements,
           dependencies: dependencies,
           settings: .targetSettings
         )
