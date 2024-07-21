@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import FirebaseCore
+import FirebaseAuth
+import GoogleSignIn
 
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   
@@ -14,6 +17,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
 
+    FirebaseApp.configure()
     sleep(1)
 
     return true
