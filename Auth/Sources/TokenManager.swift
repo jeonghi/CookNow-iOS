@@ -14,7 +14,7 @@ public protocol TokenManagerType {
   func deleteToken()
 }
 
-final class TokenManager: TokenManagerType {
+public final class TokenManager: TokenManagerType {
   
   public static let shared = TokenManager()
   
@@ -26,19 +26,19 @@ final class TokenManager: TokenManagerType {
     _ = getToken()
   }
   
-  func setToken(_ token: JWTToken?) -> JWTToken? {
+  public func setToken(_ token: JWTToken?) -> JWTToken? {
     Properties.saveCodable(key: AuthTokenKey, data: token)
     return getToken()
   }
   
-  func getToken() -> JWTToken? {
-    if let token {
+  public func getToken() -> JWTToken? {
+    if let _ = token {
       self.token = Properties.loadCodable(key: AuthTokenKey)
     }
     return self.token
   }
   
-  func deleteToken() {
+  public func deleteToken() {
     Properties.delete(AuthTokenKey)
     self.token = nil
   }
