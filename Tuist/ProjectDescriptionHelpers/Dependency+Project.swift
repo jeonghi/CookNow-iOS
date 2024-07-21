@@ -42,10 +42,16 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("UI/DesignSystemFoundation"),
     condition: nil
   )
-  
+
   static let CNNetwork = TargetDependency.project(
     target: ModuleNameSpace.Core.CNNetwork.rawValue,
     path: .relativeToRoot("Core/CNNetwork"),
+    condition: nil
+  )
+
+  static let Auth = TargetDependency.project(
+    target: ModuleNameSpace.Auth.Auth.rawValue,
+    path: .relativeToRoot("Auth"),
     condition: nil
   )
 }

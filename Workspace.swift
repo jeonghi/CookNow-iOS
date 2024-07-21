@@ -18,7 +18,8 @@ extension Workspace {
         "Feature/**",
         "UI/**",
         "Domain/**",
-        "Core/**"
+        "Core/**",
+        "Auth/**"
       ]
     )
   }
