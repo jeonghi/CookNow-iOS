@@ -65,9 +65,9 @@ extension OnboadingCore: Reducer {
         
         // MARK: Button Action
       case .appleSignInButtonTapped:
-        authService.googleSignIn()
         return .none
       case .googleSignInButtonTapped:
+        authService.googleSignIn()
         return .none
       }
     }
