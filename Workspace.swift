@@ -17,7 +17,8 @@ extension Workspace {
         "App",
         "Feature/**",
         "UI/**",
-        "Domain/**"
+        "Domain/**",
+        "Core/**"
       ]
     )
   }
