@@ -11,8 +11,10 @@ import FirebaseAuth
 import GoogleSignIn // For Google SignIn
 import AuthenticationServices // For Apple SignIn
 import CryptoKit // For Apple SignIn
+import CNNetwork
+import Common
+import Auth
 import Dependencies
-
 
 protocol AuthServiceType {
   func googleSignIn()
@@ -23,6 +25,7 @@ protocol AuthServiceType {
 
 struct AuthServiceDependencyKey: DependencyKey {
   static let liveValue: AuthServiceType = AuthServiceImpl.shared
+  static let testValue: AuthServiceType = AuthServiceStub()
 }
 
 extension DependencyValues {
@@ -32,16 +35,77 @@ extension DependencyValues {
   }
 }
 
-final class AuthServiceImpl: NSObject, AuthServiceType {
+
+final class AuthServiceStub: AuthServiceType {
+  func googleSignIn() {
+    
+  }
   
-  static let shared: AuthServiceType = AuthServiceImpl()
+  func googleSignOut() {
+    
+  }
+  
+  func appleSignIn() {
+    
+  }
+  
+  func appleSignOut() {
+    
+  }
+}
+
+final class AuthServiceImpl: NSObject {
+  
+  var network: CNNetwork.Network<CNNetwork.AuthAPI>
   
   // Unhashed nonce.
   fileprivate var currentNonce: String?
   
-  private override init() {}
+  private override init() {
+    network = .init()
+  }
+  
+  /// Firebase 인증 서버에 signIn 요청을 보냅니다.
+  private func signInWithFirebase(using credential: FirebaseAuth.AuthCredential) {
+    FirebaseAuth.Auth.auth().signIn(with: credential) { authResult, error in
+      
+      if let error {
+        print(error.localizedDescription)
+        return
+      }
+      
+      authResult?.user.getIDToken { [weak self] idToken, error in
+        guard let self else { return }
+        if let error {
+          print("Error fetching ID token: \(error.localizedDescription)")
+          return
+        }
+        if let idToken {
+          signInWithCNAuthServer(using: idToken)
+        }
+      }
+    }
+  }
+  
+  /// 쿡나우 인증 서버에 signIn 요청을 보냅니다.
+  private func signInWithCNAuthServer(using idToken: String) {
+    network.responseData(.signIn(.init(idToken)), SignInDTO.Response.self) { result in
+      switch result {
+      case .success(let res):
+        return
+      case .failure(let error):
+        return
+      }
+    }
+  }
+}
+
+extension AuthServiceImpl: AuthServiceType {
+  
+  static let shared: AuthServiceType = AuthServiceImpl()
   
   func googleSignIn() {
+    
     
     // As you’re not using view controllers to retrieve the presentingViewController, access it through
     // the shared instance of the UIApplication
@@ -66,7 +130,7 @@ final class AuthServiceImpl: NSObject, AuthServiceType {
         let user = result?.user,
         let idToken = user.idToken?.tokenString
       else {
-        print("Error during Google Sign-In authentication, \(error)")
+        print("Error during Google Sign-In authentication, \(String(describing: error))")
         return
       }
       
@@ -99,15 +163,6 @@ final class AuthServiceImpl: NSObject, AuthServiceType {
     
   }
   
-  private func signInWithFirebase(using credential: AuthCredential) {
-    Auth.auth().signIn(with: credential) { authResult, error in
-      if let error {
-        print(error.localizedDescription)
-        return
-      }
-      print("Signed in with Firebase \(authResult)")
-    }
-  }
 }
 
 /***
