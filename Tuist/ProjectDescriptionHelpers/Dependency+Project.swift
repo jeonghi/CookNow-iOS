@@ -9,7 +9,10 @@ import ProjectDescription
 
 public extension TargetDependency {
   enum Project {}
-  enum ExternalProject {}
+  enum ExternalProject {
+    /// Google SDK
+    public enum Google {}
+  }
 }
 
 public extension TargetDependency.Project {
@@ -39,10 +42,16 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("UI/DesignSystemFoundation"),
     condition: nil
   )
-  
+
   static let CNNetwork = TargetDependency.project(
     target: ModuleNameSpace.Core.CNNetwork.rawValue,
     path: .relativeToRoot("Core/CNNetwork"),
+    condition: nil
+  )
+
+  static let Auth = TargetDependency.project(
+    target: ModuleNameSpace.Auth.Auth.rawValue,
+    path: .relativeToRoot("Auth"),
     condition: nil
   )
 }
@@ -54,4 +63,12 @@ public extension TargetDependency.ExternalProject {
   
   
   static let Alamofire = TargetDependency.external(name: "Alamofire", condition: nil)
+}
+
+
+// MARK: Google SDK
+public extension TargetDependency.ExternalProject.Google {
+  static let GoogleSignIn = TargetDependency.external(name: "GoogleSignIn", condition: nil)
+  static let FirebaseAnalytics = TargetDependency.external(name: "FirebaseAnalytics", condition: nil)
+  static let FirebaseAuth = TargetDependency.external(name: "FirebaseAuth", condition: nil)
 }

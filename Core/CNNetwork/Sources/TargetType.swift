@@ -8,7 +8,7 @@
 import Foundation
 import Alamofire
 
-protocol TargetType: URLRequestConvertible {
+public protocol TargetType: URLRequestConvertible {
   var baseURL: String { get }
   var method: HTTPMethod { get }
   var path: String { get }
@@ -20,7 +20,7 @@ protocol TargetType: URLRequestConvertible {
   var apiType: ApiType { get }
 }
 
-enum ApiType {
+public enum ApiType {
   /// CookNow api 서버
   case CNApi
   /// CookNow auth 서버
@@ -28,19 +28,19 @@ enum ApiType {
 }
 
 
-enum SessionType {
+public enum SessionType {
   case Auth
   case Api
   case AuthApi
 }
 
-extension TargetType {
+public extension TargetType {
   var sessionType: SessionType { .Api }
   var apiType: ApiType { .CNApi }
 }
 
 extension TargetType {
-  func asURLRequest() throws -> URLRequest {
+  public func asURLRequest() throws -> URLRequest {
     
     guard let base = URL(string: baseURL) else {
       throw URLError(.badURL)

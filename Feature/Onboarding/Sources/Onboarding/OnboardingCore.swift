@@ -11,6 +11,7 @@ public struct OnboadingCore {
   
   // MARK: Dependency
   @Dependency(\.mainQueue) var mainQueue
+  @Dependency(\.authService) var authService
   
   // MARK: constructor
   public init() {}
@@ -34,12 +35,15 @@ extension OnboadingCore: Reducer {
   }
   
   public enum Action {
-    /// Life Cycle
+    // Life Cycle
     case onLoad
     case onAppear
     case onDisappear
     case isLoading(Bool)
     case isAnimating(Bool)
+    // MARK: Button Action
+    case googleSignInButtonTapped // 구글로그인 버튼 클릭
+    case appleSignInButtonTapped // 애플로그인 버튼 클릭
   }
   
   public var body: some ReducerOf<Self> {
@@ -57,6 +61,14 @@ extension OnboadingCore: Reducer {
         return .none
       case .isAnimating(let isAnimating):
         state.isAnimating = isAnimating
+        return .none
+        
+        // MARK: Button Action
+      case .appleSignInButtonTapped:
+        authService.appleSignIn()
+        return .none
+      case .googleSignInButtonTapped:
+        authService.googleSignIn()
         return .none
       }
     }

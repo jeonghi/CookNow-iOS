@@ -22,7 +22,7 @@ extension ProjectDescription.Settings {
   public static var targetSettings: Self {
     .settings(
       base: [
-        "OTHER_LDFLAGS": .string("-ObjC"),
+        "OTHER_LDFLAGS": "$(inherited) -ObjC"
       ],
       configurations: BuildEnvironment.allCases.map(\.targetConfiguration)
     )

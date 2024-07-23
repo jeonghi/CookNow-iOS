@@ -70,3 +70,6 @@ Derived/
 Tuist/.build
 
 *.resolved
+
+### Firebase 
+GoogleService-Info.plist

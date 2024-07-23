@@ -56,6 +56,14 @@ let package = Package(
       .package(
         url: "https://github.com/Alamofire/Alamofire",
         from: "5.9.1"
+       ),
+      .package(
+        url: "https://github.com/firebase/firebase-ios-sdk",
+        from: "10.29.0"
+      ),
+      .package(
+        url: "https://github.com/google/GoogleSignIn-iOS",
+        from: "7.1.0"
       )
     ]
 )

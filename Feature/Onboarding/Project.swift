@@ -13,7 +13,11 @@ let project = Project.makeFramework(
   dependencies: [
     .Project.Commmon,
     .Project.DesignSystem,
-    .ExternalProject.TCA
+    .Project.Auth,
+    .ExternalProject.TCA,
+    .ExternalProject.Google.FirebaseAnalytics,
+    .ExternalProject.Google.FirebaseAuth,
+    .ExternalProject.Google.GoogleSignIn
   ]
 )
 
