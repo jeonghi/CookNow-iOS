@@ -20,9 +20,11 @@ protocol NetworkType: AnyObject {
                     completion: @escaping (HTTPURLResponse?, Data?, Error?) -> Void) where Target: TargetType
 }
 
-final class Network<Target: TargetType>: NetworkType {
+public final class Network<Target: TargetType>: NetworkType {
   
-  func responseData<R: Decodable>(_ target: Target,
+  public init() {}
+  
+  public func responseData<R: Decodable>(_ target: Target,
                        _ responseType: R.Type,
                        logging: Bool = true,
                        completion: @escaping ((Result<R, Error>) -> Void)) where Target: TargetType, R: Decodable {
