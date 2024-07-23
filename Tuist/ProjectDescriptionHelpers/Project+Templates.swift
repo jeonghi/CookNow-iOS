@@ -12,6 +12,7 @@ public extension Project {
   /// App을 만드는 메서드
   static func makeApp(
     name appName: String,
+    infoPlist: InfoPlist? = nil,
     entitlements: Entitlements? = nil,
     dependencies: [TargetDependency] = []
   ) -> Project {
@@ -25,7 +26,7 @@ public extension Project {
           destinations: .iOS,
           product: .app,
           bundleId: "\(Environment.bundleId)",
-          infoPlist: .extendingDefault(with: [
+          infoPlist: infoPlist ?? .extendingDefault(with: [
             "UILaunchStoryboardName": "Launch Screen.storyboard"
           ]),
           sources: .sources,
