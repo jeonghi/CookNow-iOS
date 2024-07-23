@@ -12,7 +12,8 @@ import PackageDescription
         // productTypes: ["Alamofire": .framework,] 
       productTypes: [
         "Lottie": .framework,
-        "ComposableArchitecture": .framework
+        "ComposableArchitecture": .framework,
+        "Alamofire": .framework
       ]
     )
 #endif
@@ -51,6 +52,10 @@ let package = Package(
       .package(
         url: "https://github.com/airbnb/lottie-ios.git",
         from: "4.5.0"
+      ),
+      .package(
+        url: "https://github.com/Alamofire/Alamofire",
+        from: "5.9.1"
       )
     ]
 )

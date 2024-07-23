@@ -31,4 +31,8 @@ public extension ModuleNameSpace {
   enum Domain: String {
     case Domain = "Domain"
   }
+  
+  enum Core: String {
+    case CNNetwork = "CNNetwork"
+  }
 }

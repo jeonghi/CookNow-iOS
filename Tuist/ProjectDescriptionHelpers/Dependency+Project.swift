@@ -39,10 +39,19 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("UI/DesignSystemFoundation"),
     condition: nil
   )
+  
+  static let CNNetwork = TargetDependency.project(
+    target: ModuleNameSpace.Core.CNNetwork.rawValue,
+    path: .relativeToRoot("Core/CNNetwork"),
+    condition: nil
+  )
 }
 
 public extension TargetDependency.ExternalProject {
   static let TCA = TargetDependency.external(name: "ComposableArchitecture", condition: nil)
   
   static let Lottie = TargetDependency.external(name: "Lottie", condition: nil)
+  
+  
+  static let Alamofire = TargetDependency.external(name: "Alamofire", condition: nil)
 }
