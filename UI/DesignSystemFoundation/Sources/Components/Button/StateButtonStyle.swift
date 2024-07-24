@@ -69,21 +69,19 @@ extension StateButtonStyle: ButtonStyle {
     
     let config: StateButtonConfiguration = configurations[currentState] ?? .default
     
-    return configuration.label
-      .kerning(0.5)
+    return ZStack {
+      RoundedRectangle(cornerRadius: 6)
+        .fill(config.background.toColor())
+        configuration.label
+      }
+      .kerning(-0.6)
       .font(config.fontConfig?.toFont())
-      .padding(10)
       .foregroundStyle(
         currentState == .progress ? Color.asset(.clear) : config.foreground.toColor()
       )
       .frame(
         width: buttonSize.width,
         height: buttonSize.height
-      )
-      .frame(maxWidth: .infinity)
-      .background(
-        RoundedRectangle(cornerRadius: 6)
-          .fill(config.background.toColor())
       )
       .overlay(
         ZStack {
