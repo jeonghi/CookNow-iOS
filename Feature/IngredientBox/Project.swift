@@ -13,6 +13,7 @@ let project = Project.makeFramework(
   dependencies: [
     .Project.Commmon,
     .Project.DesignSystem,
+    .Project.Domain,
     .ExternalProject.TCA,
   ]
 )
