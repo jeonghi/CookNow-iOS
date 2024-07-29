@@ -13,6 +13,8 @@ import DesignSystemFoundation
 
 public struct CNCalendarView: UIViewControllerRepresentable {
   
+  public init() {}
+  
   public typealias UIViewControllerType = CNCalendarUIViewController
   
   public func makeUIViewController(context: Context) -> CNCalendarUIViewController {
