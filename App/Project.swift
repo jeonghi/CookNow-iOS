@@ -7,6 +7,7 @@ let project = Project.makeApp(
   entitlements: .file(path: .relativeToRoot("SupportingFiles/App.entitlements")),
   dependencies: [
     .Project.DesignSystem,
-    .Project.Onboarding
+    .Project.Onboarding,
+    .Project.Setting
   ]
 )
