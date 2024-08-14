@@ -180,6 +180,7 @@ extension CNCalendarUIView: UIViewConfigurable {
 
 extension CNCalendarUIView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
   
+  
   // MARK: FSCalendarDelegate
   func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
     let currentPage = calendarView.currentPage
@@ -197,10 +198,10 @@ extension CNCalendarUIView: FSCalendarDelegate, FSCalendarDataSource, FSCalendar
   
   // MARK: FSCalendarDelegateAppearance
   func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
-      let month = calendar.currentPage
-      if !Calendar.current.isDate(date, equalTo: month, toGranularity: .month) {
-          return .clear
-      }
+//      let month = calendar.currentPage
+//      if !Calendar.current.isDate(date, equalTo: month, toGranularity: .month) {
+//          return .clear
+//      }
       return nil
   }
 }
