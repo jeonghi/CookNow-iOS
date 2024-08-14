@@ -17,6 +17,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
 
+    AppAppearance.configure()
     FirebaseApp.configure()
     sleep(1)
 
