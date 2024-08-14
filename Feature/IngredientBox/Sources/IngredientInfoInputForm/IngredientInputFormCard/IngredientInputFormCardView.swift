@@ -9,45 +9,71 @@ import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
 import Domain
+import Common
+import ComposableArchitecture
 
-struct IngredientInputFormCardView {
+// MARK: Properties
+public struct IngredientInputFormCardView: BaseFeatureViewType {
   
-  // MARK: Properties
-  @Binding var ingredientStorage: IngredientStorage
+  public typealias Core = IngredientInputFormCardCore
+  public let store: StoreOf<Core>
   
-  // MARK: Handlers
-  var onCopyIngredient: ((IngredientStorage.ID) -> Void)? = nil
-  var onRemoveIngredient: ((IngredientStorage.ID) -> Void)? = nil
-  var onDateSelection: (() -> Void)? = nil
+  @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
-  // MARK: Initailizer
-  init(
-    _ ingredientStorage: Binding<IngredientStorage>
+  public struct ViewState: Equatable {
+    
+    private var ingredientStorage: IngredientStorage
+    var ingredient: Ingredient { ingredientStorage.ingredient }
+    var quantity: Int { ingredientStorage.quantity }
+    var storageType: StorageType { ingredientStorage.storageType }
+    var imageUrl: URL? { ingredient.imageUrl }
+    var name: String { ingredient.name }
+    var minusButtonEnable: Bool { quantity <= 1 }
+    var plusButtonEnable: Bool { quantity >= 99 }
+    var expirationDate: String {
+      let formatter = DateFormatter()
+      formatter.dateFormat = "YYYY. MM. dd"
+      return formatter.string(from: ingredientStorage.expirationDate)
+    }
+    
+    public init(state: CoreState) {
+      ingredientStorage = state.ingredientStorage
+    }
+  }
+  
+  public init(
+    _ store: StoreOf<Core> = .init(
+      initialState: Core.State(ingredientStorage: .dummyData)
+    ){
+      Core()
+    }
   ) {
-    self._ingredientStorage = ingredientStorage
+    self.store = store
+    self.viewStore = ViewStore(store, observe: ViewState.init)
   }
 }
 
+
 extension IngredientInputFormCardView: View {
-  var body: some View {
+  public var body: some View {
     VStack(spacing: 20) {
       HStack(alignment: .top, spacing: 20) {
-        _thumbnail
+        thumbnail()
         VStack(alignment: .leading, spacing: 15) {
           HStack {
-            _storageTypeSelectionMenu
+            storageTypeSelectionMenu()
             Spacer()
-            _copyIngredientButton
+            copyIngredientButton()
           }
           
-          _ingredientNameLabel
+          ingredientNameLabel()
         }
       }
       
       HStack {
-        _expirationDateSelectionButton
+        expirationDateSelectionButton()
         Spacer()
-        _ingredientAmountCounter
+        ingredientAmountCounter()
       }
     }
     .kerning(-0.6)
@@ -56,9 +82,10 @@ extension IngredientInputFormCardView: View {
 
 // MARK: Components
 private extension IngredientInputFormCardView {
-  var _copyIngredientButton: some View {
+  @ViewBuilder
+  func copyIngredientButton() -> some View {
     Button(action: {
-      onCopyIngredient?(ingredientStorage.id)
+      viewStore.send(.copyIngredient)
     }) {
       Text("재료 복제")
         .underline()
@@ -67,11 +94,12 @@ private extension IngredientInputFormCardView {
     .tint(.asset(.gray800))
   }
   
-  var _thumbnail: some View {
+  @ViewBuilder
+  func thumbnail() -> some View {
     ZStack {
-      _ingredientImage
+      ingredientImage()
         .overlay(
-          _removeButton
+          removeButton()
             .vBottom()
             .hTrailing()
             .offset(x: 4, y: 4)
@@ -79,8 +107,9 @@ private extension IngredientInputFormCardView {
     }
   }
   
-  var _ingredientImage: some View {
-    CNAsyncImage(ingredientStorage.ingredient.imageUrl)
+  @ViewBuilder
+  func ingredientImage() -> some View {
+    CNAsyncImage(viewStore.imageUrl)
       .scaledToFit()
       .padding(.horizontal, 3)
       .padding(.vertical, 2)
@@ -92,18 +121,20 @@ private extension IngredientInputFormCardView {
           .fill(Color.asset(.gray100))
       )
       .overlay(RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.asset(.gray200), lineWidth: /*@START_MENU_TOKEN@*/1.0/*@END_MENU_TOKEN@*/))
+        .stroke(Color.asset(.gray200), lineWidth: 1.0))
   }
   
-  var _ingredientNameLabel: some View {
-    Text(ingredientStorage.ingredient.name)
+  @ViewBuilder
+  func ingredientNameLabel() -> some View {
+    Text(viewStore.name)
       .font(.asset(.subhead3))
       .foregroundStyle(Color.asset(.gray800))
   }
   
-  var _removeButton: some View {
+  @ViewBuilder
+  func removeButton() -> some View {
     Button(action: {
-      onRemoveIngredient?(ingredientStorage.id)
+      viewStore.send(.removeIngredient)
     }){
       Image(systemName: "minus")
         .foregroundStyle(Color.asset(.white))
@@ -111,29 +142,25 @@ private extension IngredientInputFormCardView {
         .aspectRatio(1, contentMode: .fit)
         .clipShape(Circle())
         .background(Circle().fill(Color.asset(.danger500)))
-        .overlay(Circle().stroke(Color.asset(.gray200), lineWidth: /*@START_MENU_TOKEN@*/1.0/*@END_MENU_TOKEN@*/))
+        .overlay(Circle().stroke(Color.asset(.gray200), lineWidth: 1.0))
     }
     .frame(width: 24, height: 24)
   }
   
-  var _storageTypeSelectionMenu: some View {
-    Menu {
-      ForEach(StorageType.allCases, id: \.self) { type in
-        Button(action: {
-          ingredientStorage.storageType = type
-        }) {
-          Label(type.name, systemImage: ingredientStorage.storageType == type ? "checkmark" : "")
-        }
-      }
-    } label: {
+  @ViewBuilder
+  func storageTypeSelectionMenu() -> some View {
+    
+    Button(action: {
+      viewStore.send(.selectStorageType)
+    }) {
       HStack {
-        Text(ingredientStorage.storageType.name)
+        Text(viewStore.storageType.name)
         Image(systemName: "chevron.down")
       }
     }
     .foregroundStyle(
       {
-        switch ingredientStorage.storageType {
+        switch viewStore.storageType {
         case .freezer:
           return Color.asset(.white)
         default:
@@ -147,53 +174,58 @@ private extension IngredientInputFormCardView {
     .clipShape(RoundedRectangle(cornerRadius: 3))
     .background(
       RoundedRectangle(cornerRadius: 3).fill(
-        ingredientStorage.storageType.color
+        viewStore.storageType.color
       )
     )
     .overlay(
       RoundedRectangle(cornerRadius: 3).stroke(
-        ingredientStorage.storageType.highlight
+        viewStore.storageType.highlight
       )
     )
   }
   
-  var _plusButton: some View {
+  @ViewBuilder
+  func plusButton() -> some View {
     Button(action: {
-      ingredientStorage.quantity += 1
+      viewStore.send(.plusIngredientAmount)
     }){
       Image(systemName: "plus")
     }.buttonStyle(StateButtonStyle.secondary(.big))
       .frame(width: 32, height: 32)
-      .disabled(ingredientStorage.quantity >= 99)
+      .disabled(viewStore.plusButtonEnable)
   }
   
-  var _minusButton: some View {
+  @ViewBuilder
+  func minusButton() -> some View {
     Button(action: {
-      ingredientStorage.quantity -= 1
+      viewStore.send(.minusIngredientAmount)
     }){
       Image(systemName: "minus")
     }.buttonStyle(StateButtonStyle.secondary(.big))
       .frame(width: 32, height: 32)
-      .disabled(ingredientStorage.quantity <= 1)
+      .disabled(viewStore.minusButtonEnable)
   }
   
-  var _ingredientAmountCounter: some View {
+  @ViewBuilder
+  func ingredientAmountCounter() -> some View {
     HStack(spacing: 5) {
-      _minusButton
-      Text("\(ingredientStorage.quantity)")
+      minusButton()
+      Text("\(viewStore.quantity)")
         .frame(width: 32, height: 32)
-      _plusButton
+      plusButton()
     }
     .font(.asset(.body2))
   }
   
-  var _expirationDateSelectionButton: some View {
+  @ViewBuilder
+  func expirationDateSelectionButton() -> some View {
     Button(action: {
+      viewStore.send(.selectDate)
     }) {
       Text("유통기한:   ")
         .foregroundStyle(Color.asset(.gray500))
       +
-      Text(ingredientStorage.formattedString)
+      Text(viewStore.expirationDate)
         .foregroundStyle(Color.asset(.gray800))
     }
     .font(.asset(.body2))
@@ -208,24 +240,6 @@ private extension IngredientInputFormCardView {
         .stroke(Color.asset(.gray300))
     )
   }
-  
-  var _datePicker: some View {
-    VStack(alignment: .center, spacing: 0) {
-      DatePicker(selection: $ingredientStorage.expirationDate) {}
-        .datePickerStyle(.graphical)
-        .aspectRatio(338/356, contentMode: .fit)
-        .frame(maxWidth: .infinity)
-      HStack(alignment: .center, spacing: 10) {
-        Button(action: {}) {
-          Text("취소")
-        }.buttonStyle(StateButtonStyle.secondary(.default))
-        Button(action: {}) {
-          Text("수정")
-        }.buttonStyle(StateButtonStyle.primary(.default))
-          .disabled(true)
-      }
-    }
-  }
 }
 
 private extension Domain.StorageType {
@@ -239,18 +253,7 @@ private extension Domain.StorageType {
       return .asset(.success300)
     }
   }
-  
-  //  var focused: Color {
-  //    switch self {
-  //    case .roomTemperature:
-  //      return .asset(.warning700)
-  //    case .freezer:
-  //      return .asset(.info700)
-  //    case .refrigerator:
-  //      return .asset(.success700)
-  //    }
-  //  }
-  
+
   var highlight: Color {
     switch self {
     case .roomTemperature:
@@ -274,54 +277,11 @@ private extension Domain.StorageType {
   }
 }
 
-private extension Domain.IngredientStorage {
-  var formattedString: String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "YYYY. MM. dd"
-    return formatter.string(from: expirationDate)
-  }
-}
-
-extension IngredientInputFormCardView {
-  func onCopyIngredient(action: @escaping (IngredientStorage.ID) -> Void) -> Self {
-    var view = self
-    view.onCopyIngredient = action
-    return view
-  }
-  
-  func onRemoveIngredient(action: @escaping (IngredientStorage.ID) -> Void) -> Self {
-    var view = self
-    view.onRemoveIngredient = action
-    return view
-  }
-  
-  func onDateSelection(action: @escaping () -> Void) -> Self {
-    var view = self
-    view.onDateSelection = action
-    return view
-  }
-}
-
-
-
-
 #if(DEBUG)
 
 struct IngredientInputFormCardPreview: View {
-  @State var storageData = IngredientStorage.dummyData
-  
   var body: some View {
-    IngredientInputFormCardView($storageData)
-      .onCopyIngredient { _ in
-        print("복제")
-      }
-      .onRemoveIngredient { _ in
-        print("삭제")
-      }
-      .onDateSelection {
-        
-      }
-      .padding()
+    IngredientInputFormCardView()
   }
 }
 
@@ -329,3 +289,4 @@ struct IngredientInputFormCardPreview: View {
   IngredientInputFormCardPreview()
 }
 #endif
+
