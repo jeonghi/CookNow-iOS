@@ -1,0 +1,83 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "App Information" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Information"
+          }
+        }
+      }
+    },
+    "공지사항" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Announcement"
+          }
+        }
+      }
+    },
+    "로그아웃" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign Out"
+          }
+        }
+      }
+    },
+    "문의하기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact"
+          }
+        }
+      }
+    },
+    "버전 정보" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Version"
+          }
+        }
+      }
+    },
+    "앱 버전 정보" : {
+
+    },
+    "정말 로그아웃하시겠습니까?" : {
+
+    },
+    "정말 회원탈퇴를 진행하시겠습니까?" : {
+
+    },
+    "취소" : {
+
+    },
+    "탈퇴" : {
+
+    },
+    "회원탈퇴" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Withdrawl"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
