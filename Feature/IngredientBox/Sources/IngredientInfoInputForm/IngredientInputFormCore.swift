@@ -11,6 +11,8 @@ import Domain
 
 public struct IngredientInputFormCore: Reducer {
   
+  public typealias FormCard = IngredientInputFormCardCore
+  
   // MARK: Dependencies
   
   // MARK: Constructor
@@ -19,36 +21,57 @@ public struct IngredientInputFormCore: Reducer {
   }
   
   // MARK: State
-  public struct State {
+  public struct State: Equatable {
     
     var isLoading: Bool
-    var ingredientStorageList: [IngredientStorage]
+    var formCardStateList: IdentifiedArrayOf<FormCard.State>
     var scrolledIngredientStorageId: IngredientStorage.ID?
+    var dateSelectionSheetState: DateSelectionSheetCore.State?
     
     public init(isLoading: Bool = false, ingredientStorageList: [IngredientStorage] = []) {
       self.isLoading = isLoading
-      #if(DEBUG)
-      self.ingredientStorageList = [IngredientStorage.dummyData, IngredientStorage.dummyData]
-      #else
-      self.ingredientStorageList = ingredientStorageList
-      #endif
-      self.scrolledIngredientStorageId = self.ingredientStorageList.first?.id
+#if(DEBUG)
+      self.formCardStateList = [
+        FormCard.State(ingredientStorage: .dummyData),
+        FormCard.State(ingredientStorage: .dummyData)
+      ]
+#else
+      self.formCardStateList = IdentifiedArray(
+        uniqueElements: formCardStateList.map { FormCard.State(ingredientStorage: $0) }
+      )
+#endif
+      self.scrolledIngredientStorageId = self.formCardStateList.first?.id
     }
   }
   
   // MARK: Action
   public enum Action {
+    
+    // MARK: Child Reducer Action
+    case formCardAction(id: IngredientStorage.ID, action: FormCard.Action)
+    case dateSelectionSheetAction(action: DateSelectionSheetCore.Action)
+    case updateDateSelectionSheetState(DateSelectionSheetCore.State?)
+    
     // MARK: Life Cycle
     case onLoad
     case onAppear
     case onDisappear
     case isLoading(Bool)
+    
     // MARK: View defined Action
-    case addIngredientButtonTapped
-    case scrollTo(IngredientStorage.ID?)
-    case updateIngredientStorageList([IngredientStorage])
-    case copyIngredientStorage(IngredientStorage.ID)
-    case deleteIngredientStorage(IngredientStorage.ID)
+    case scrollTo(IngredientStorage.ID?) // 스크롤 이동
+    
+    // MARK: Date Selection
+    case dateSelectionSheetPresented(IngredientStorage.ID)
+    case dateSelectionSheetDismissed
+    case dateSelected(Date)
+    
+    // MARK: New Ingredient
+    case addIngredientButtonTapped // 재료 추가 버튼 클릭
+    
+    // MARK: Done Button Tapped
+    case doneButtonTapped
+    
     // MARK: Networking
   }
   
@@ -57,6 +80,7 @@ public struct IngredientInputFormCore: Reducer {
     
     Reduce { state, action in
       switch action {
+        
         // MARK: Life Cycle
       case .onAppear:
         return .none
@@ -67,30 +91,81 @@ public struct IngredientInputFormCore: Reducer {
       case .isLoading(let isLoading):
         state.isLoading = isLoading
         return .none
+        
         // MARK: View defined Action
-      case .addIngredientButtonTapped:
-        return .none
       case .scrollTo(let id):
         state.scrolledIngredientStorageId = id
         return .none
-      case .updateIngredientStorageList(let updated):
-        state.ingredientStorageList = updated
+        
+        // MARK: Date Selection
+      case .dateSelectionSheetPresented:
         return .none
-      case .copyIngredientStorage(let id):
-        guard let index = state.ingredientStorageList.firstIndex(where: { $0.id == id }) else {
+      case .dateSelectionSheetDismissed:
+        return .none
+      case .dateSelected:
+        return .none
+        
+        // MARK: New Ingredient
+      case .addIngredientButtonTapped:
+        return .none
+        
+        // MARK: Done Button Tapped
+      case .doneButtonTapped:
+        return .send(.isLoading(true))
+        
+        
+        // MARK: Child Reducer Action
+      case let .formCardAction(id, cardAction):
+        guard let focusedformCardState = state.formCardStateList[id: id], let idx = state.formCardStateList.index(id: id) else {
           return .none
         }
-        guard var copiedIngredient = state.ingredientStorageList[safe: index] else {
+        switch cardAction {
+        case .copyIngredient:
+          var copiedFormCardState = focusedformCardState
+          let newID: UUID = .init()
+          copiedFormCardState.id = newID
+          state.formCardStateList.insert(copiedFormCardState, at: idx + 1)
+          return .send(.scrollTo(newID))
+        case .selectStorageType:
+          return .none
+        case .selectDate:
+          state.dateSelectionSheetState = .init(ingredientID: id, selection: focusedformCardState.ingredientStorage.expirationDate)
+          return .none
+        case .removeIngredient:
+          state.formCardStateList.remove(id: id)
+          return .none
+        default:
           return .none
         }
-        copiedIngredient.id = UUID() // 새로운 ID 생성
-        state.ingredientStorageList.insert(copiedIngredient, at: index + 1)
-        return .send(.scrollTo(copiedIngredient.id))
-      case .deleteIngredientStorage(let id):
-          state.ingredientStorageList.removeAll { $0.id == id }
+        
+      case let .dateSelectionSheetAction(dateSelectionSheetAction):
+        switch dateSelectionSheetAction {
+        case .cancel:
+          state.dateSelectionSheetState = nil
           return .none
-        // MARK: Networking
+        case .confirm(let id, let selectedDate):
+          guard var focusedformCardState = state.formCardStateList[id: id] else {
+              return .none
+          }
+          focusedformCardState.ingredientStorage.expirationDate = selectedDate
+          if let idx = state.formCardStateList.index(id: id) {
+              state.formCardStateList[idx] = focusedformCardState
+          }
+          return .none
+        default:
+          return .none
+        }
+        
+      case let .updateDateSelectionSheetState(updated):
+        state.dateSelectionSheetState = updated
+        return .none
       }
+    }
+    .forEach(\.formCardStateList, action: /Action.formCardAction(id:action:)) {
+      FormCard()
+    }
+    .ifLet(\.dateSelectionSheetState, action: /Action.dateSelectionSheetAction) {
+      DateSelectionSheetCore()
     }
   }
 }

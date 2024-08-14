@@ -16,6 +16,7 @@ import Domain
 // MARK: Properties
 public struct IngredientInputFormView: BaseFeatureViewType {
   
+  typealias FormCard = IngredientInputFormCardCore
   public typealias Core = IngredientInputFormCore
   public let store: StoreOf<Core>
   
@@ -23,11 +24,15 @@ public struct IngredientInputFormView: BaseFeatureViewType {
   @State private var scrollProxy: ScrollViewProxy?
   
   public struct ViewState: Equatable {
-    var ingredientStorageList: [IngredientStorage]
+    var formCardStateList: IdentifiedArrayOf<FormCard.State>
+    var dateSelectionSheetState: DateSelectionSheetCore.State?
     var scrolledIngredientStorageId: IngredientStorage.ID?
     var isLoading: Bool
+    var doneButtonEnable: Bool { formCardStateList.count > 0 && !isLoading }
+    var isIngredientEmpty: Bool { formCardStateList.count <= 0 }
     public init(state: CoreState) {
-      ingredientStorageList = state.ingredientStorageList
+      formCardStateList = state.formCardStateList
+      dateSelectionSheetState = state.dateSelectionSheetState
       scrolledIngredientStorageId = state.scrolledIngredientStorageId
       isLoading = state.isLoading
     }
@@ -49,8 +54,16 @@ private extension IngredientInputFormView {
   enum Metric {
     static var contentHorizontalPadding: CGFloat = 20
     static var contentVerticalPadding: CGFloat = 20
-    static var doneButtonBottomPadding: CGFloat = 20
+    static var doneButtonBottomPadding: CGFloat = 30
+    
+    static var infoLabelAndAdBannerSpacing: CGFloat = 18
+    static var notiLabelSpacing: CGFloat = 2
+    static var notiLabelAndButtonSpacing: CGFloat = 20
   }
+}
+
+private extension ButtonSize {
+  static let addIngredient = ButtonSize(width: 114, height: 40)
 }
 
 // MARK: Layout
@@ -58,75 +71,93 @@ extension IngredientInputFormView: View {
   
   public var body: some View {
     VStack {
+      VStack(spacing: Metric.infoLabelAndAdBannerSpacing) {
+        introductionSection()
+        adSection()
+      }
+      .padding(.horizontal, Metric.contentHorizontalPadding)
+      
       ScrollView(.vertical) {
         Group {
-          _introductionSection
-          _adSection
-          _ingredientStorageFormListSection
+          ingredientStorageFormListSection()
             .padding(.vertical, Metric.contentVerticalPadding)
         }
         .padding(.horizontal, Metric.contentHorizontalPadding)
-        
         Divider()
         
         Group {
-          _addIngredientSection
+          addIngredientSection()
             .padding(.vertical, Metric.contentVerticalPadding)
         }
         .padding(.horizontal, Metric.contentHorizontalPadding)
         
         Divider()
       }
+      .replaceIf(viewStore.isIngredientEmpty) {
+        noIngredientSection()
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      }
       
-      _formInputDoneButton
+      formInputDoneButton()
         .padding(.horizontal, Metric.contentHorizontalPadding)
-        .padding(.bottom, Metric.doneButtonBottomPadding)
     }
-    .cnLoading(viewStore.binding(get: \.isLoading, send: CoreAction.isLoading))
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .cnSheet(
+      item: viewStore.binding(
+        get: \.dateSelectionSheetState,
+        send: CoreAction.updateDateSelectionSheetState
+      )
+    ) { _ in
+      IfLetStore(
+        store.scope(
+          state: \.dateSelectionSheetState,
+          action: CoreAction.dateSelectionSheetAction
+        )
+      ) { store in
+        DateSelectionSheetView(store)
+      }
+    }
     .kerning(-0.6)
+    .cnLoading(viewStore.isLoading)
+    .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding)
   }
 }
 
-// MARK: Componet
+// MARK: Components
 private extension IngredientInputFormView {
   
   // MARK: Section
-  var _introductionSection: some View {
-    _introductionLabel
+  @ViewBuilder
+  func introductionSection() -> some View {
+    introductionLabel()
       .hLeading()
   }
   
-  var _adSection: some View {
-    _adArea
+  @ViewBuilder
+  func adSection() -> some View {
+    adArea()
       .hCenter()
   }
   
-  var _ingredientStorageFormListSection: some View {
+  @ViewBuilder
+  func ingredientStorageFormListSection() -> some View {
     ScrollViewReader { proxy in
       LazyVStack(spacing: 20) {
-        ForEach(
-          viewStore.binding(
-            get: \.ingredientStorageList,
-            send: CoreAction.updateIngredientStorageList
+        ForEachStore(
+          store.scope(
+            state: \.formCardStateList,
+            action: CoreAction.formCardAction
           )
-        ) { ingredientStorage in
-          IngredientInputFormCardView(ingredientStorage)
-            .onCopyIngredient { id in
-              withAnimation(.easeOut) {
-                _ = { viewStore.send(.copyIngredientStorage(id)) } ()
-              }
-            }
-            .onDateSelection {
-              
-            }
-            .onRemoveIngredient { id in
-              withAnimation(.easeOut) {
-                _ = { viewStore.send(.deleteIngredientStorage(id)) } ()
-              }
-            }
-            .id(ingredientStorage.id)
-        } // ForEach
+        ) {
+          IngredientInputFormCardView.init($0)
+            .id($0.id)
+        }
+        .onDelete { indexSet in
+          for index in indexSet {
+            let id = viewStore.formCardStateList[index].id
+            viewStore.send(.formCardAction(id: id, action: .removeIngredient))
+          }
+        }
         .onAppear {
           self.scrollProxy = proxy
         }
@@ -139,15 +170,37 @@ private extension IngredientInputFormView {
     } // ScrollViewReader
   }
   
-  var _addIngredientSection: some View {
+  @ViewBuilder
+  func addIngredientSection() -> some View {
     HStack {
-      _addIngredientSectionLabel
-      _addIngredientSectionButton
+      addIngredientSectionLabel()
+      addIngredientSectionButton()
+    }
+  }
+  
+  @ViewBuilder
+  func noIngredientSection() -> some View {
+    VStack(alignment: .center, spacing: Metric.notiLabelAndButtonSpacing) {
+      notificationLabel()
+      addIngredientSectionButton()
     }
   }
   
   // MARK: Other Components
-  var _introductionLabel: some View {
+  
+  @ViewBuilder
+  func notificationLabel() -> some View {
+    VStack(alignment: .center, spacing: Metric.notiLabelSpacing) {
+      Text("정보를 입력할 재료가 없습니다.")
+        .font(.asset(.subhead2))
+      Text("아래 재료 추가하기 버튼으로\n재료를 추가해서 정보를 입력해보세요!")
+        .font(.asset(.caption))
+    }
+    .multilineTextAlignment(.center)
+  }
+  
+  @ViewBuilder
+  func introductionLabel() -> some View {
     Text("내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!")
       .multilineTextAlignment(.leading)
       .lineLimit(2)
@@ -155,7 +208,8 @@ private extension IngredientInputFormView {
       .foregroundStyle(Color.asset(.gray800))
   }
   
-  var _adArea: some View {
+  @ViewBuilder
+  func adArea() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 6)
         .fill(Color.asset(.danger300))
@@ -169,14 +223,16 @@ private extension IngredientInputFormView {
     .frame(maxWidth: .infinity)
   }
   
-  var _addIngredientSectionButton: some View {
+  @ViewBuilder
+  func addIngredientSectionButton() -> some View {
     Button(action: { viewStore.send(.addIngredientButtonTapped) }) {
       Label("재료 추가하기", systemImage: "plus")
-    }.buttonStyle(StateButtonStyle.secondary(.addIngredient))
+    }
+    .buttonStyle(StateButtonStyle.secondary(.addIngredient))
   }
   
-  var _addIngredientSectionLabel: some View {
-    
+  @ViewBuilder
+  func addIngredientSectionLabel() -> some View {
     Group {
       Text("더 필요한게 있나요?\n").font(.asset(.subhead2)) +
       Text("빠진 재료가 있다면 추가해보세요").font(.asset(.caption))
@@ -185,15 +241,20 @@ private extension IngredientInputFormView {
     .hLeading()
   }
   
-  var _formInputDoneButton: some View {
-    Button(action: {}) {
+  @ViewBuilder
+  func formInputDoneButton() -> some View {
+    Button(action: {
+      viewStore.send(.doneButtonTapped)
+    }) {
       Text("입력 완료")
     }
     .buttonStyle(StateButtonStyle.primary(.done))
+    .disabled(!viewStore.doneButtonEnable)
   }
   
   // MARK: Popup
-  var _askForRemovePopup: some View {
+  @ViewBuilder
+  func askForRemovePopup() -> some View {
     VStack(alignment: .center, spacing: 16) {
       Text("삭제")
         .font(.asset(.headline1))
@@ -220,10 +281,6 @@ private extension IngredientInputFormView {
       }
     }
   }
-}
-
-private extension ButtonSize {
-  static let addIngredient = ButtonSize(width: 114, height: 40)
 }
 
 #Preview {
