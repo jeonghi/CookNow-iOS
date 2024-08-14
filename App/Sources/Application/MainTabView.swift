@@ -8,8 +8,11 @@
 import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
+import Setting
+import Common
 
 struct MainTabView {
+  
   @State var selectedTab: MainTabType = .IngredientsBox
   
   private enum Metric {
@@ -22,6 +25,8 @@ extension MainTabView: View {
   var body: some View {
     TabView(selection: $selectedTab) {
       ForEach(MainTabType.allCases, id: \.self) { tabType in
+        
+        
         ZStack {
           switch tabType {
           case .IngredientsBox:
@@ -33,8 +38,12 @@ extension MainTabView: View {
               Color.asset(.bg100)
             }
           case .Setting:
-            VStack {
-              Color.asset(.bg100)
+            NavigationWrapper {
+              LazyNavigationView(
+                SettingView()
+                  .navigationTitle(tabType.title)
+                  .navigationBarTitleDisplayMode(.inline)
+              )
             }
           }
         }
@@ -46,12 +55,12 @@ extension MainTabView: View {
               .frame(width: Metric.tabIconSize, height: Metric.tabIconSize)
             Text(tabType.title)
           }
-          .foregroundStyle(Color.asset(.primary700))
-          .tint(Color.asset(.primary700))
+          //          .foregroundStyle(Color.asset(.primary700))
         }
         .tag(tabType)
       }
-    }
+    } //: TabView
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
 

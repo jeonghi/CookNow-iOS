@@ -34,20 +34,27 @@ enum AppAppearance {
   }
   
   private static func configureTabBarAppearance() {
-    
-    // UITabBarAppearance()
     let appearance = UITabBarAppearance()
+    appearance.configureWithDefaultBackground()
     
-    appearance.configureWithOpaqueBackground()
-    appearance.backgroundColor = .asset(.white)
-    
-    // UITabBar.appearance()
-    let tabBarAppearance = UITabBar.appearance()
-    
-    tabBarAppearance.tintColor = UIColor.asset(.primary700)
-    tabBarAppearance.isTranslucent = false
-    tabBarAppearance.standardAppearance = appearance
-    tabBarAppearance.scrollEdgeAppearance = appearance
+    UITabBar.appearance().standardAppearance = appearance
+    if #available(iOS 15.0, *) {
+      UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
+    // UITabBarAppearance()
+//    let appearance = UITabBarAppearance()
+//    
+//    appearance.configureWithOpaqueBackground()
+//    appearance.backgroundColor = .asset(.white)
+//    
+//    // UITabBar.appearance()
+//    let tabBarAppearance = UITabBar.appearance()
+//    
+//    tabBarAppearance.tintColor = UIColor.asset(.primary700)
+//    tabBarAppearance.isTranslucent = false
+//    tabBarAppearance.standardAppearance = appearance
+//    tabBarAppearance.scrollEdgeAppearance = appearance
 //    tabBarAppearance.layer.cornerRadius = 30
 //    tabBarAppearance.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
   }
