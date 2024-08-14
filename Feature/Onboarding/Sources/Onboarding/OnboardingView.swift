@@ -21,9 +21,12 @@ public struct OnboardingView: BaseFeatureViewType {
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
   public struct ViewState: Equatable {
-    var isAnimating: Bool
+    var isVisibleLoginRegion: Bool
+    var animationProgressTime: AnimationProgressTime
+    
     public init(state: CoreState) {
-      isAnimating = state.isAnimating
+      isVisibleLoginRegion = state.isVisibleLoginRegion
+      animationProgressTime = state.animationProgressTime
     }
   }
   
@@ -65,8 +68,8 @@ extension OnboardingView: View {
         } // HStack
         .padding(.top, Metric.socialSignUpButtonStackTopPadding)
       } // VStack
-      .opacity(viewStore.isAnimating ? 0 : 1)
-      .animation(/*@START_MENU_TOKEN@*/.easeIn/*@END_MENU_TOKEN@*/(duration: 0.5), value: !viewStore.isAnimating)
+      .opacity(viewStore.isVisibleLoginRegion ? 1 : 0)
+      .animation(/*@START_MENU_TOKEN@*/.easeIn/*@END_MENU_TOKEN@*/(duration: 0.5), value: viewStore.isVisibleLoginRegion)
     } // ZStack
     .frameAllInfinity()
     .onLoad {
@@ -102,6 +105,7 @@ extension OnboardingView {
       viewStore.send(.isAnimating(false))
     })
     .resizable()
+    .getRealtimeAnimationProgress(viewStore.binding(get: \.animationProgressTime, send: CoreAction.updateAnimationProgressTime))
     .ignoresSafeArea(.all)
   }
   

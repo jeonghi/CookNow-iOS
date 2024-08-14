@@ -12,7 +12,8 @@ import DesignSystemFoundation
 public extension View {
   func cnSheet<PopupContent: View>(
     isPresented: Binding<Bool>,
-    @ViewBuilder view: @escaping () -> PopupContent
+    @ViewBuilder view: @escaping () -> PopupContent,
+    dismissCallback: (() -> Void)? = nil
   ) -> some View {
     self
       .popup(isPresented: isPresented) {
@@ -30,7 +31,39 @@ public extension View {
           .position(.bottom)
           .dragToDismiss(true)
           .closeOnTap(false)
+          .closeOnTapOutside(true)
           .backgroundColor(Color.asset(.overlayBackground))
+          .dismissCallback {
+            dismissCallback?()
+          }
+      }
+  }
+  
+  func cnSheet<Item: Equatable, PopupContent: View> (
+    item: Binding<Item?>,
+    @ViewBuilder view: @escaping (Item) -> PopupContent,
+    dismissCallback: (() -> Void)? = nil
+  ) -> some View {
+    self
+      .popup(item: item) { item in
+        ZStack {
+          view(item)
+            .padding(.top, 24)
+            .padding(.horizontal, 18.5)
+            .padding(.bottom, 35)
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color.asset(.white))
+      } customize: {
+        $0
+          .position(.bottom)
+          .dragToDismiss(true)
+          .closeOnTap(false)
+          .closeOnTapOutside(true)
+          .backgroundColor(Color.asset(.overlayBackground))
+          .dismissCallback {
+            dismissCallback?()
+          }
       }
   }
 }

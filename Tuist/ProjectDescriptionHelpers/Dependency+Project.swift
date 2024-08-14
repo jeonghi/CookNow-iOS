@@ -54,6 +54,12 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("Auth"),
     condition: nil
   )
+  
+  static let Domain = TargetDependency.project(
+    target: ModuleNameSpace.Domain.Domain.rawValue,
+    path: .relativeToRoot("Domain"),
+    condition: nil
+  )
 }
 
 public extension TargetDependency.ExternalProject {

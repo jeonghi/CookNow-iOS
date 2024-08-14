@@ -9,21 +9,46 @@ import Foundation
 
 /// 식재료 보관 모델
 /// - 어떤 식재료를, 몇개를, 어떻게 보관하고, 유통기한은 언제인지 대한 정보를 담은 구조체
-public struct IngredientStorage: Identifiable {
+public struct IngredientStorage: Identifiable, Hashable, Equatable {
   
-  public let id: UUID
+  public var id: UUID
   
   /// 보관할 식재료
-  let ingredient: Ingredient
+  public let ingredient: Ingredient
   
   /// 보관 유형
-  var storageType: StorageType
+  public var storageType: StorageType
+  
+  private var _quantity: Int
   
   /// 보관 갯수
-  var quantity: Int
+  public var quantity: Int {
+    get {
+      _quantity
+    }
+    
+    set {
+      if newValue < 1 {
+        _quantity = 1
+      } else if newValue > 99 {
+        _quantity = 99
+      } else {
+        _quantity = newValue
+      }
+    }
+  }
+  
+  private var _expirationDate: Date
   
   /// 보관 만료일
-  var expirationDate: Date
+  public var expirationDate: Date {
+    get {
+      _expirationDate
+    }
+    set {
+      _expirationDate = newValue
+    }
+  }
   
   // MARK: Initializer
   public init(
@@ -35,13 +60,23 @@ public struct IngredientStorage: Identifiable {
     self.id = UUID()
     self.ingredient = ingredient
     self.storageType = storageType
-    self.quantity = quantity
-    self.expirationDate = expirationDate
+    self._quantity = quantity
+    self._expirationDate = expirationDate
   }
   
   var formattedExpirationDate: String {
     let formatter = DateFormatter()
     formatter.dateStyle = .short
     return formatter.string(from: expirationDate)
+  }
+}
+
+
+public extension IngredientStorage {
+  static var dummyData: IngredientStorage {
+    .init(
+      ingredient: .dummyData,
+      storageType: .freezer
+    )
   }
 }

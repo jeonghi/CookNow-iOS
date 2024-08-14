@@ -6,6 +6,7 @@
 //
 
 import ComposableArchitecture
+import Foundation
 
 public struct OnboadingCore {
   
@@ -24,6 +25,10 @@ extension OnboadingCore: Reducer {
     var isLoading: Bool = false
     var searchText: String = ""
     var isAnimating: Bool = true
+    var animationProgressTime: CGFloat = .zero
+    var isVisibleLoginRegion: Bool {
+      animationProgressTime > 0.7
+    }
     
     public init() {
       
@@ -44,6 +49,8 @@ extension OnboadingCore: Reducer {
     // MARK: Button Action
     case googleSignInButtonTapped // 구글로그인 버튼 클릭
     case appleSignInButtonTapped // 애플로그인 버튼 클릭
+    // MARK: Binding
+    case updateAnimationProgressTime(CGFloat)
   }
   
   public var body: some ReducerOf<Self> {
@@ -69,6 +76,11 @@ extension OnboadingCore: Reducer {
         return .none
       case .googleSignInButtonTapped:
         authService.googleSignIn()
+        return .none
+        
+        // MARK: Binding
+      case .updateAnimationProgressTime(let updated):
+        state.animationProgressTime = updated
         return .none
       }
     }
