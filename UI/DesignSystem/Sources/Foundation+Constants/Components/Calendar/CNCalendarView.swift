@@ -13,7 +13,11 @@ import DesignSystemFoundation
 
 public struct CNCalendarView: UIViewControllerRepresentable {
   
-  public init() {}
+  @Binding var selectedDate: Date
+  
+  public init(selection: Binding<Date> = .constant(Date())) {
+    _selectedDate = selection
+  }
   
   public typealias UIViewControllerType = CNCalendarUIViewController
   
