@@ -17,6 +17,7 @@ public extension ModuleNameSpace {
   enum Feature: String {
     case Onboading = "Onboading"
     case IngredientBox = "IngredientBox"
+    case Setting = "Setting"
   }
   
   enum Common: String {
