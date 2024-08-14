@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoadingModifier: ViewModifier {
-  @Binding var isLoading: Bool
+  var isLoading: Bool
   
   func body(content: Content) -> some View {
     ZStack {
@@ -26,7 +26,7 @@ struct LoadingModifier: ViewModifier {
 }
 
 public extension View {
-  func cnLoading(_ isLoading: Binding<Bool>) -> some View {
+  func cnLoading(_ isLoading: Bool) -> some View {
     self.modifier(LoadingModifier(isLoading: isLoading))
   }
 }
