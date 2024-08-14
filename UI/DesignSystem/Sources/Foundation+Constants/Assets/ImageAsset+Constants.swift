@@ -13,6 +13,15 @@ public extension ImageAsset {
   static let appleLogin = ImageAsset("apple_login", in: .module, format: .image)
   static let googleLogin = ImageAsset("google_login", in: .module, format: .image)
   
+  // MARK: Tab Icon
+  static let refrigeratorTab = ImageAsset("refrigeratorTab", in: .module, format: .image) // 냉장고
+  static let refrigeratorSelectedTab = ImageAsset("refrigeratorSelectedTab", in: .module, format: .image) // 냉장고 (선택)
+  static let ingredientBoxTab = ImageAsset("ingredientBoxTab", in: .module, format: .image) // 재료함
+  static let ingredientBoxSelectedTab = ImageAsset("ingredientBoxSelectedTab", in: .module, format: .image) // 재료함 (선택)
+  static let settingTab = ImageAsset("settingTab", in: .module, format: .image) // 설정
+  static let settingSelectedTab = ImageAsset("settingSelectedTab", in: .module, format: .image) // 설정 (선택)
+  
+  
   // MARK: Icon
   static let leftChevron = ImageAsset("left_chevron", in: .module, format: .image)
   static let rightChevron = ImageAsset("right_chevron", in: .module, format: .image)
