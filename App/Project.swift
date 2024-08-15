@@ -8,6 +8,7 @@ let project = Project.makeApp(
   dependencies: [
     .Project.DesignSystem,
     .Project.Onboarding,
-    .Project.Setting
+    .Project.Setting,
+    .Project.IngredientBox
   ]
 )
