@@ -8,6 +8,7 @@
 import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
+import IngredientBox
 import Setting
 import Common
 
@@ -29,13 +30,18 @@ extension MainTabView: View {
         
         ZStack {
           switch tabType {
-          case .IngredientsBox:
-            VStack {
-              Color.asset(.bg100)
-            }
           case .Refrigerator:
             VStack {
               Color.asset(.bg100)
+            }
+          case .IngredientsBox:
+            
+            NavigationWrapper {
+              LazyNavigationView(
+                IngredientBoxView()
+                  .navigationTitle(tabType.title)
+                  .toolbar(.hidden, for: .navigationBar)
+              )
             }
           case .Setting:
             NavigationWrapper {
@@ -47,6 +53,7 @@ extension MainTabView: View {
             }
           }
         }
+        .hideKeyboardWhenTappedAround()
         .tabItem {
           VStack(spacing: Metric.tabItemInnerSpacing) {
             Image.asset(selectedTab == tabType ? tabType.selectedIcon : tabType.icon)
