@@ -39,9 +39,9 @@ extension AuthAPI: TargetType {
     case .signIn:
       return "/oauth/sign-in"
     case .signOut:
-      return ""
+      return "/oauth/sign-out"
     case .refreshToken:
-      return ""
+      return "/oauth/refresh"
     }
   }
   
@@ -50,6 +50,10 @@ extension AuthAPI: TargetType {
     case .signIn(let request):
       return [
         HTTPHeader.authorization.rawValue: "Bearer \(request.idToken)",
+        HTTPHeader.contentType.rawValue: HTTPHeader.json.rawValue
+      ]
+    case .signOut:
+      return [
         HTTPHeader.contentType.rawValue: HTTPHeader.json.rawValue
       ]
     default:

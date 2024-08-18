@@ -14,13 +14,13 @@ public protocol TokenManagerType {
   func deleteToken()
 }
 
-public final class TokenManager: TokenManagerType {
+public final class TokenManager: TokenManagerType, ObservableObject {
   
   public static let shared = TokenManager()
   
   private let AuthTokenKey = "com.cooknow.auth.token"
   
-  var token: JWTToken?
+  @Published public var token: JWTToken?
   
   private init() {
     _ = getToken()
@@ -32,7 +32,7 @@ public final class TokenManager: TokenManagerType {
   }
   
   public func getToken() -> JWTToken? {
-    if let _ = token {
+    if token == nil {
       self.token = Properties.loadCodable(key: AuthTokenKey)
     }
     return self.token
