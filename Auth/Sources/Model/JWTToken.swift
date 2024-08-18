@@ -28,7 +28,7 @@ public struct JWTToken: Codable {
   let refreshTokenExpiredAt: Date
   
   // MARK: Init
-  init(accessToken: String, refreshToken: String) {
+  public init(accessToken: String, refreshToken: String) {
     self.accessToken = accessToken
     self.refreshToken = refreshToken
     
@@ -89,12 +89,12 @@ public struct JWTToken: Codable {
   }
   
   /// 액세스 토큰 만료 여부 반환
-  var isAccessTokenExpired: Bool {
+  public var isAccessTokenExpired: Bool {
     return Date() >= expiredAt
   }
 
   /// 리프레시 토큰의 만료 여부를 반환
-  var isRefreshTokenExpired: Bool {
+  public var isRefreshTokenExpired: Bool {
     return Date() >= refreshTokenExpiredAt
   }
 }
