@@ -18,6 +18,7 @@ public extension ModuleNameSpace {
     case Onboading = "Onboading"
     case IngredientBox = "IngredientBox"
     case Setting = "Setting"
+    case Refrigerator = "Refrigerator"
   }
   
   enum Common: String {

@@ -26,6 +26,11 @@ public extension TargetDependency.Project {
     path: .relativeToRoot("Feature/IngredientBox"),
     condition: nil
   )
+  static let Refrigerator = TargetDependency.project(
+    target: ModuleNameSpace.Feature.Refrigerator.rawValue,
+    path: .relativeToRoot("Feature/Refrigerator"),
+    condition: nil
+  )
   
   static let Setting = TargetDependency.project(
     target: ModuleNameSpace.Feature.Setting.rawValue,
