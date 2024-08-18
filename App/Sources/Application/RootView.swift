@@ -7,26 +7,17 @@
 
 import SwiftUI
 import Onboading
-import Auth
-
 
 struct RootView {
-  @ObservedObject private var tokenManager = TokenManager.shared
-  var isLoggedIn: Bool {
-    if let token = tokenManager.token,
-       !token.isAccessTokenExpired {
-      return true
-    }
-    return false
-  }
+  @StateObject private var coordinator: UICoordinator = .init()
 }
 
 extension RootView: View {
   var body: some View {
-    if !isLoggedIn {
-      OnboardingView()
+    if coordinator.isLoggedIn {
+      MainTabView(coordinator: coordinator)
     } else {
-      MainTabView(selectedTab: .IngredientsBox)
+      OnboardingView()
     }
   }
 }
