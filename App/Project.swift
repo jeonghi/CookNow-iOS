@@ -9,6 +9,7 @@ let project = Project.makeApp(
     .Project.DesignSystem,
     .Project.Onboarding,
     .Project.Setting,
-    .Project.IngredientBox
+    .Project.IngredientBox,
+    .Project.Refrigerator
   ]
 )

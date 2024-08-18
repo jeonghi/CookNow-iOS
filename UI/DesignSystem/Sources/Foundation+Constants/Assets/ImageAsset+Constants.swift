@@ -29,19 +29,15 @@ public extension ImageAsset {
   static let magnifyingglass = ImageAsset("magnifyingglass", in: .module, format: .image)
   static let xmark = ImageAsset("xmark", in: .module, format: .image)
   
+  // MARK: Refrigerator
+  static let refrigerator = ImageAsset("refrigerator", in: .module, format: .image)
+  
   // MARK: IngredientBox
   static let ingredientBoxHomeHeaderBackground = ImageAsset("ingredient_box_home_header", in: .module, format: .image)
+  
+  // MARK: InformationBox
+  static let sesac = ImageAsset("sesac", in: .module, format: .image)
+  static let questionBox = ImageAsset("questionBox", in: .module, format: .image)
+  static let bomb = ImageAsset("bomb", in: .module, format: .image)
+  static let bigEye = ImageAsset("bigEye", in: .module, format: .image)
 }
-
-#if(DEBUG) && canImport(SwiftUI)
-import SwiftUI
-
-private extension ImageAsset {
-  static let sampleImage = ImageAsset("sample_image", in: .module, format: .image)
-}
-
-#Preview {
-  Image.asset(.sampleImage)
-}
-
-#endif
