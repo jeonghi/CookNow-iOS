@@ -15,17 +15,21 @@ import Common
 
 struct MainTabView {
   
-  @State var selectedTab: MainTabType = .IngredientsBox
+  @ObservedObject var coordinator: UICoordinator
   
   private enum Metric {
     static let tabItemInnerSpacing: CGFloat = 4
     static let tabIconSize: CGFloat = 24
   }
+  
+  init(coordinator: UICoordinator = .init()){
+    self.coordinator = coordinator
+  }
 }
 
 extension MainTabView: View {
   var body: some View {
-    TabView(selection: $selectedTab) {
+    TabView(selection: $coordinator.selectedTab) {
       ForEach(MainTabType.allCases, id: \.self) { tabType in
         
         
@@ -61,7 +65,7 @@ extension MainTabView: View {
         .hideKeyboardWhenTappedAround()
         .tabItem {
           VStack(spacing: Metric.tabItemInnerSpacing) {
-            Image.asset(selectedTab == tabType ? tabType.selectedIcon : tabType.icon)
+            Image.asset(coordinator.selectedTab == tabType ? tabType.selectedIcon : tabType.icon)
               .renderingMode(.original)
               .resizable()
               .frame(width: Metric.tabIconSize, height: Metric.tabIconSize)
