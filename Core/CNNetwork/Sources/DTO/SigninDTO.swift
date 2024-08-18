@@ -17,7 +17,7 @@ public enum SignInDTO {
   }
   
   public struct Response: Decodable {
-    let accessToken: String
-    let refreshToken: String
+    public let accessToken: String
+    public let refreshToken: String
   }
 }
