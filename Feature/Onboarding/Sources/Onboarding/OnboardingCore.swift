@@ -72,11 +72,16 @@ extension OnboadingCore: Reducer {
         
         // MARK: Button Action
       case .appleSignInButtonTapped:
-        authService.appleSignIn()
-        return .none
+        
+        return .run { send in
+          try await authService.appleSignIn()
+        }
+        
       case .googleSignInButtonTapped:
-        authService.googleSignIn()
-        return .none
+        
+        return .run { send in
+          try await authService.googleSignIn()
+        }
         
         // MARK: Binding
       case .updateAnimationProgressTime(let updated):

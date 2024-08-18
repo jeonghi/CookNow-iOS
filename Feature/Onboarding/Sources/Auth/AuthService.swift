@@ -17,10 +17,10 @@ import Auth
 import Dependencies
 
 protocol AuthServiceType {
-  func googleSignIn()
-  func googleSignOut()
-  func appleSignIn()
-  func appleSignOut()
+  func googleSignIn() async throws
+  func googleSignOut() async throws
+  func appleSignIn() async throws
+  func appleSignOut() async throws
 }
 
 struct AuthServiceDependencyKey: DependencyKey {
@@ -66,37 +66,27 @@ final class AuthServiceImpl: NSObject {
   }
   
   /// Firebase 인증 서버에 signIn 요청을 보냅니다.
-  private func signInWithFirebase(using credential: FirebaseAuth.AuthCredential) {
-    FirebaseAuth.Auth.auth().signIn(with: credential) { authResult, error in
-      
-      if let error {
-        print(error.localizedDescription)
-        return
-      }
-      
-      authResult?.user.getIDToken { [weak self] idToken, error in
-        guard let self else { return }
-        if let error {
-          print("Error fetching ID token: \(error.localizedDescription)")
-          return
-        }
-        if let idToken {
-          signInWithCNAuthServer(using: idToken)
-        }
-      }
-    }
+  private func signInWithFirebase(using credential: FirebaseAuth.AuthCredential) async throws {
+    
+    let authResult = try await FirebaseAuth.Auth.auth().signIn(with: credential)
+    
+    let idToken = try await authResult.user.getIDToken()
+    
+    let responseDTO = try await signInWithCNAuthServer(using: idToken)
   }
   
   /// 쿡나우 인증 서버에 signIn 요청을 보냅니다.
-  private func signInWithCNAuthServer(using idToken: String) {
-    network.responseData(.signIn(.init(idToken)), SignInDTO.Response.self) { result in
-      switch result {
-      case .success(let res):
-        return
-      case .failure(let error):
-        return
+  private func signInWithCNAuthServer(using idToken: String) async throws -> SignInDTO.Response {
+      try await withCheckedThrowingContinuation { continuation in
+          network.responseData(.signIn(.init(idToken)), SignInDTO.Response.self) { result in
+              switch result {
+              case .success(let res):
+                  continuation.resume(returning: res)
+              case .failure(let error):
+                  continuation.resume(throwing: error)
+              }
+          }
       }
-    }
   }
 }
 
@@ -104,13 +94,13 @@ extension AuthServiceImpl: AuthServiceType {
   
   static let shared: AuthServiceType = AuthServiceImpl()
   
-  func googleSignIn() {
+  func googleSignIn() async throws {
     
     
     // As you’re not using view controllers to retrieve the presentingViewController, access it through
     // the shared instance of the UIApplication
-    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
-    guard let rootViewController = windowScene.windows.first?.rootViewController else { return }
+    guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+    guard let rootViewController = await windowScene.windows.first?.rootViewController else { return }
     
     guard let clientID = FirebaseApp.app()?.options.clientID else { return }
     
@@ -119,30 +109,21 @@ extension AuthServiceImpl: AuthServiceType {
     
     GIDSignIn.sharedInstance.configuration = config
     // Start the sign in flow!
-    GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { [unowned self] result, error in
-      
-      if let error {
-        print("Error doing Google Sign-In, \(error)")
-        return
-      }
-      
-      guard
-        let user = result?.user,
-        let idToken = user.idToken?.tokenString
-      else {
-        print("Error during Google Sign-In authentication, \(String(describing: error))")
-        return
-      }
-      
-      let credential = GoogleAuthProvider.credential(
-        withIDToken: idToken,
-        accessToken: user.accessToken.tokenString
-      )
-      
-      
-      // Authenticate with Firebase
-      signInWithFirebase(using: credential)
+    
+    let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+    
+    guard let idToken = result.user.idToken?.tokenString else {
+//      ("Error during Google Sign-In authentication, \(String(describing: error))")
+      return
     }
+    
+    let credential = GoogleAuthProvider.credential(
+      withIDToken: idToken,
+      accessToken: result.user.accessToken.tokenString
+    )
+    
+    // Authenticate with Firebase
+    try await signInWithFirebase(using: credential)
   }
   
   func googleSignOut() {
@@ -162,7 +143,6 @@ extension AuthServiceImpl: AuthServiceType {
   func appleSignOut() {
     
   }
-  
 }
 
 /***
@@ -212,7 +192,7 @@ private extension AuthServiceImpl {
     currentNonce = nonce
     let appleIDProvider = ASAuthorizationAppleIDProvider()
     let request = appleIDProvider.createRequest()
-    request.requestedScopes = [.fullName, .email]
+    request.requestedScopes = [.fullName, .email] // 이름과 email요청
     request.nonce = sha256(nonce)
     
     let authorizationController = ASAuthorizationController(authorizationRequests: [request])
@@ -252,8 +232,10 @@ extension AuthServiceImpl: ASAuthorizationControllerDelegate, ASAuthorizationCon
                                                      rawNonce: nonce,
                                                      fullName: appleIDCredential.fullName)
       
-      // Sign in with Firebase.
-      signInWithFirebase(using: credential)
+      // Sign in with Firebase. (Used Task for Bridging Sync and Async)
+      Task {
+        try await signInWithFirebase(using: credential)
+      }
     }
   }
   
