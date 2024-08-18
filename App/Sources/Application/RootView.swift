@@ -7,9 +7,18 @@
 
 import SwiftUI
 import Onboading
+import Auth
+
 
 struct RootView {
-  @State var isLoggedIn: Bool = true
+  @ObservedObject private var tokenManager = TokenManager.shared
+  var isLoggedIn: Bool {
+    if let token = tokenManager.token,
+       !token.isAccessTokenExpired {
+      return true
+    }
+    return false
+  }
 }
 
 extension RootView: View {
