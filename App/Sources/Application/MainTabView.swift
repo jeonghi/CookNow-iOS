@@ -10,6 +10,7 @@ import DesignSystem
 import DesignSystemFoundation
 import IngredientBox
 import Setting
+import Refrigerator
 import Common
 
 struct MainTabView {
@@ -31,8 +32,12 @@ extension MainTabView: View {
         ZStack {
           switch tabType {
           case .Refrigerator:
-            VStack {
-              Color.asset(.bg100)
+            NavigationWrapper {
+              LazyNavigationView(
+                RefrigeratorHomeView()
+                  .navigationTitle(tabType.title)
+                  .navigationBarTitleDisplayMode(.inline)
+              )
             }
           case .IngredientsBox:
             
@@ -62,11 +67,11 @@ extension MainTabView: View {
               .frame(width: Metric.tabIconSize, height: Metric.tabIconSize)
             Text(tabType.title)
           }
-          //          .foregroundStyle(Color.asset(.primary700))
         }
         .tag(tabType)
       }
     } //: TabView
+    .tint(Color.asset(.primary700))
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
