@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Common
 
 /// 식재료 모델
 public struct Ingredient: Identifiable, Equatable, Hashable {
@@ -15,22 +16,29 @@ public struct Ingredient: Identifiable, Equatable, Hashable {
   
   /// 식재료 이름
   public let name: String
-  
   public let imageUrl: URL?
+  public let category: IngredientCategory.ID?
   
   // MARK: Initializer
   public init(
     id: String = UUID().uuidString,
     name: String,
-    imageUrl: String? = nil
+    imageUrl: String? = nil,
+    category: IngredientCategory.ID? = nil
+  ) {
+    self.init(id: id, name: name, imageUrl: imageUrl?.asUrl(), category: category)
+  }
+  
+  public init(
+    id: String = UUID().uuidString,
+    name: String,
+    imageUrl: URL? = nil,
+    category: IngredientCategory.ID? = nil
   ) {
     self.id = id
     self.name = name
-    if let imageUrl {
-      self.imageUrl = URL(string: imageUrl)
-    } else {
-      self.imageUrl = nil
-    }
+    self.imageUrl = imageUrl
+    self.category = category
   }
 }
 
