@@ -7,17 +7,20 @@
 
 import SwiftUI
 import Onboading
+import Auth
 
 struct RootView {
-  @StateObject private var coordinator: UICoordinator = .init()
+  @StateObject private var coordinator: UICoordinator = .shared
 }
 
 extension RootView: View {
   var body: some View {
-    if coordinator.isLoggedIn {
-      MainTabView(coordinator: coordinator)
-    } else {
-      OnboardingView()
+    ZStack {
+      if coordinator.isLoggedIn {
+        MainTabView()
+      } else {
+        OnboardingView()
+      }
     }
   }
 }
