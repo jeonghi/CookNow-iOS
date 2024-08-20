@@ -14,7 +14,8 @@ let project = Project.makeFramework(
     .Project.Commmon,
     .Project.DesignSystem,
     .Project.Domain,
-    .Project.CNNetwork
+    .Project.CNNetwork,
+    .Project.Auth
   ]
 )
 

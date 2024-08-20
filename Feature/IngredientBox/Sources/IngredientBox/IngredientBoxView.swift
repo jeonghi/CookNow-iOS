@@ -7,8 +7,10 @@
 
 import SwiftUI
 import DesignSystem
+import DesignSystemFoundation
 import ComposableArchitecture
 import Common
+import Domain
 
 // MARK: Properties
 public struct IngredientBoxView: BaseFeatureViewType {
@@ -19,11 +21,20 @@ public struct IngredientBoxView: BaseFeatureViewType {
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
   public struct ViewState: Equatable {
+    var isLoading: Bool
     var searchText: String
-    var selectedType: Core.IngredientType
+    var selectedCategory: IngredientCategory?
+    var categories: [IngredientCategory]
+    var currCategoryIngredients: [Ingredient]
+    var ingredientBox: [Ingredient]
+    
     public init(state: CoreState) {
+      isLoading = state.isLoading
       searchText = state.searchText
-      selectedType = state.selectedType
+      selectedCategory = state.selectedCategory
+      categories = state.categories
+      currCategoryIngredients = state.currCategoryIngredients
+      ingredientBox = state.selectedingredientBox
     }
   }
   
@@ -39,89 +50,220 @@ public struct IngredientBoxView: BaseFeatureViewType {
   }
 }
 
+// MARK: Metrics
+extension IngredientBoxView {
+  
+  private enum Metric {
+    static let horizontalPadding: CGFloat = 20
+    static let bottomPadding: CGFloat = 20
+    static let headerSpacing: CGFloat = 8
+    static let segmentControlHeight: CGFloat = 35
+    static let kerning: CGFloat = -0.6
+    static let searchBarMaxLength: Int = 30
+    static let searchBarPlaceholder: String = "재료를 입력하세요."
+    static let infoLabelText: String = "내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!"
+    
+    static let gridItemVerticalSpacing: CGFloat = 10
+    static let gridItemHorizontalSpacing: CGFloat = 15
+    static let gridVerticalPadding: CGFloat = 20
+    static let gridHorizontalPadding: CGFloat = 20
+    static let itemInnerSpacing: CGFloat = 6
+  }
+}
+
 // MARK: Layout
 extension IngredientBoxView: View {
   
   public var body: some View {
-    
     VStack(spacing: 0) {
-      Group {
-        _headerSectionBackgroundImage
-          .overlay {
-            _headerSection
-              .vBottom()
-              .padding(.horizontal, 20)
-              .padding(.bottom, 20)
-          }
-        
-        _ingredientSegmentControl
-        
-      }
-      .background(
-        Color.asset(.white)
-      )
+      VStack(spacing: 20) {
+        ZStack(alignment: .bottom) {
+          Image.asset(.ingredientBoxHomeHeaderBackground)
+            .resizable()
+            .scaledToFit()
+          VStack(alignment: .leading, spacing: Metric.headerSpacing) {
+            infoLabel()
+            CNSearchBar()
+          } //: VStack
+          .padding(.horizontal, Metric.horizontalPadding)
+        } //: ZStask
+        ingredientSegmentControl()
+      } //: VStack
+      .background(Color.asset(.white))
       
       ScrollView(.vertical, showsIndicators: true) {
-        
+        ingredientGridView()
+          .padding(.vertical, 50)
       }
     }
-    .background(
-      Color.asset(.bgMain)
-    )
+    .overlay(alignment: .bottom) {
+      if viewStore.ingredientBox.count > 0 {
+        Button(action: {}) {
+          makeIngredientBox()
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color.asset(.bgMain))
     .ignoresSafeArea(edges: [.horizontal, .top])
-    .kerning(-0.6) // 자간 -0.6
+    .kerning(Metric.kerning) // 자간 -0.6
+    .cnLoading(viewStore.isLoading)
+    .onLoad {
+      viewStore.send(.onLoad)
+    }
   }
 }
 
-// MARK: Componet
+// MARK: Components
 extension IngredientBoxView {
   
-  private var _headerSection: some View {
-    VStack(spacing: 8) {
-      _infoLabel
-        .hLeading()
-      _searchBar
-        .hCenter()
-    }
-  }
-  
-  private var _headerSectionBackgroundImage: some View {
+  @ViewBuilder
+  private func headerSectionBackgroundImage() -> some View {
     Image.asset(.ingredientBoxHomeHeaderBackground)
       .resizable()
       .scaledToFit()
   }
   
-  private var _searchBar: some View {
+  @ViewBuilder
+  private func searchBar() -> some View {
     CNSearchBar(
       text: viewStore.binding(
         get: \.searchText,
         send: CoreAction.updateSearchText
       ),
-      placeholder: "재료를 입력하세요.",
-      maxLength: 30
+      placeholder: Metric.searchBarPlaceholder,
+      maxLength: Metric.searchBarMaxLength
     )
   }
   
-  private var _infoLabel: some View {
-    Text(
-      "내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!"
-    )
-    .multilineTextAlignment(.leading)
-    .font(.asset(.caption))
-    .lineLimit(2)
-    .foregroundStyle(Color.asset(.gray800))
+  @ViewBuilder
+  private func infoLabel() -> some View {
+    Text(Metric.infoLabelText)
+      .multilineTextAlignment(.leading)
+      .font(.asset(.caption))
+      .lineLimit(2)
+      .foregroundStyle(Color.asset(.gray800))
   }
   
-  private var _ingredientSegmentControl: some View {
-    CNSegmentControl(
-      segments: Core.IngredientType.mockData,
-      selected: viewStore.binding(
-        get: \.selectedType,
-        send: CoreAction.selectType
-      )
-    )
-    .frame(height: 35)
+  @ViewBuilder
+  private func ingredientSegmentControl() -> some View {
+    
+    ZStack {
+      if let selectedCategory = viewStore.selectedCategory {
+        CNSegmentControl<IngredientCategory>(
+          segments: viewStore.categories,
+          selected: viewStore.binding(
+            get: { state in selectedCategory },
+            send: CoreAction.selectCategory
+          ),
+          label: { $0.catergoryName }
+        )
+      }
+    }.frame(height: Metric.segmentControlHeight)
     .frame(maxWidth: .infinity)
+  }
+  
+  @ViewBuilder
+  private func ingredientGridView() -> some View {
+    
+    let columns = [GridItem](repeating: .init(.flexible(), spacing: Metric.gridItemHorizontalSpacing), count: 4)
+    
+    LazyVGrid(columns: columns, spacing: Metric.gridItemVerticalSpacing) {
+      ForEach(viewStore.currCategoryIngredients, id: \.self) { ingredient in
+        ingredientGridItemView(item: ingredient)
+      }
+    }
+    .padding(.horizontal, Metric.gridHorizontalPadding)
+  }
+  
+  @ViewBuilder
+  private func ingredientGridItemView(item: Ingredient) -> some View {
+    
+    let isContained: Bool = viewStore.ingredientBox.contains(item)
+    
+    VStack(spacing: Metric.itemInnerSpacing) {
+      
+      Button(action: {
+        if(isContained) {
+          viewStore.send(.putOutIngredient(item))
+        } else {
+          viewStore.send(.putInIngredient(item))
+        }
+      }){
+        
+        CNAsyncImage(item.imageUrl)
+          .aspectRatio(1, contentMode: .fit)
+          .padding(2)
+          .background(Color.asset(.white))
+          .clipShape(RoundedRectangle(cornerRadius: 12))
+          .overlay(alignment: .bottomTrailing) {
+            makeButton(for: isContained)
+              .offset(x: 4, y: 4)
+          }
+      }
+      
+      Text(item.name)
+        .foregroundStyle(Color.asset(.black))
+        .font(.asset(.bodyBold1))
+    }
+  }
+  
+  @ViewBuilder
+  private func makeButton(for isContained: Bool) -> some View {
+    Circle()
+      .fill(Color.asset(isContained ? .danger500 : .primary500))
+      .frame(width: 24, height: 24)
+      .overlay {
+        Image(systemName: isContained ? "minus" : "plus")
+          .foregroundStyle(Color.asset(.white))
+      }
+  }
+  
+  @ViewBuilder
+  private func makeIngredientBox() -> some View {
+    HStack(spacing: 10) {
+      
+      Image(systemName: "basket")
+        .foregroundStyle(Color.asset(.white))
+        .frame(width: 24, height: 24)
+        .padding(9)
+        .background(Color.asset(.primary500))
+        .clipShape(Circle())
+        .overlay(alignment: .bottomTrailing) {
+          Circle()
+            .fill(Color.asset(.danger500))
+            .frame(width: 20, height: 20)
+            .overlay {
+              Text("\(viewStore.ingredientBox.count)")
+                .foregroundStyle(Color.asset(.white))
+                .font(.asset(.bodyBold))
+            }
+            .offset(x: 2, y: 2)
+        }
+      
+      VStack(alignment: .leading, spacing: 5) {
+        Text("재료 정보 입력")
+          .font(.asset(.subhead2))
+          .foregroundStyle(Color.asset(.white))
+        Text("선택한 재료의 상세 정보 입력하러 가기")
+          .font(.asset(.body1))
+          .foregroundStyle(Color.asset(.gray300))
+      }
+      
+      Spacer()
+      
+      Image(systemName: "arrow.up.forward")
+        .font(.asset(.bodyBold3))
+        .foregroundStyle(Color.asset(.white))
+        .padding(5)
+      
+    }
+    .padding()
+    .frame(maxWidth: .infinity)
+    .background(Color.black.opacity(0.8))
+    .clipShape(RoundedRectangle(cornerRadius: 50))
   }
 }
 
@@ -137,3 +279,4 @@ extension IngredientBoxView {
       .environment(\.locale, .init(identifier: "ko"))
   }
 }
+

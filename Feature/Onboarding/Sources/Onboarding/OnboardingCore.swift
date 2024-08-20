@@ -73,14 +73,22 @@ extension OnboadingCore: Reducer {
         // MARK: Button Action
       case .appleSignInButtonTapped:
         
-        return .run { send in
-          try await authService.appleSignIn()
+        return .run { @MainActor send in
+          do {
+            try await authService.appleSignIn()
+          } catch {
+            
+          }
         }
         
       case .googleSignInButtonTapped:
         
-        return .run { send in
-          try await authService.googleSignIn()
+        return .run { @MainActor send in
+          do {
+            try await authService.googleSignIn()
+          } catch {
+            
+          }
         }
         
         // MARK: Binding

@@ -12,24 +12,47 @@ import IngredientBox
 import Setting
 import Refrigerator
 import Common
+import ComposableArchitecture
 
-struct MainTabView {
+// MARK: Properties
+public struct MainTabView: BaseFeatureViewType {
   
-  @ObservedObject var coordinator: UICoordinator
+  public typealias Core = MainTabCore
+  public let store: StoreOf<Core>
+  
+  @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
+  
+  public struct ViewState: Equatable {
+    
+    var selectedTab: MainTabType
+    
+    public init(state: CoreState) {
+      selectedTab = state.selectedTab
+    }
+  }
+  
+  public init(
+    _ store: StoreOf<Core> = .init(
+      initialState: Core.State()
+    ){
+      Core()
+    }
+  ) {
+    self.store = store
+    self.viewStore = ViewStore(store, observe: ViewState.init)
+  }
+  
   
   private enum Metric {
     static let tabItemInnerSpacing: CGFloat = 4
     static let tabIconSize: CGFloat = 24
   }
-  
-  init(coordinator: UICoordinator = .init()){
-    self.coordinator = coordinator
-  }
 }
 
 extension MainTabView: View {
-  var body: some View {
-    TabView(selection: $coordinator.selectedTab) {
+  public var body: some View {
+    
+    TabView(selection: viewStore.binding(get: \.selectedTab, send: CoreAction.selectTab)) {
       ForEach(MainTabType.allCases, id: \.self) { tabType in
         
         
@@ -38,19 +61,17 @@ extension MainTabView: View {
           case .Refrigerator:
             NavigationWrapper {
               LazyNavigationView(
-                RefrigeratorHomeView()
+                RefrigeratorHomeView(refrigeratorStore)
                   .navigationTitle(tabType.title)
                   .navigationBarTitleDisplayMode(.inline)
               )
             }
           case .IngredientsBox:
-            
             NavigationWrapper {
-              LazyNavigationView(
-                IngredientBoxView()
-                  .navigationTitle(tabType.title)
-                  .toolbar(.hidden, for: .navigationBar)
-              )
+              IngredientBoxView(ingredientBoxStore)
+                .navigationTitle(tabType.title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(.hidden, for: .navigationBar)
             }
           case .Setting:
             NavigationWrapper {
@@ -65,7 +86,7 @@ extension MainTabView: View {
         .hideKeyboardWhenTappedAround()
         .tabItem {
           VStack(spacing: Metric.tabItemInnerSpacing) {
-            Image.asset(coordinator.selectedTab == tabType ? tabType.selectedIcon : tabType.icon)
+            Image.asset(viewStore.selectedTab == tabType ? tabType.selectedIcon : tabType.icon)
               .renderingMode(.original)
               .resizable()
               .frame(width: Metric.tabIconSize, height: Metric.tabIconSize)
@@ -77,6 +98,16 @@ extension MainTabView: View {
     } //: TabView
     .tint(Color.asset(.primary700))
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+private extension MainTabView {
+  private var ingredientBoxStore: StoreOf<IngredientBoxCore> {
+    return store.scope(state: \.ingredientBoxState, action: CoreAction.ingredientBoxAction)
+  }
+  
+  private var refrigeratorStore: StoreOf<RefrigeratorHomeCore> {
+    return store.scope(state: \.refrigeratorState, action: CoreAction.refrigeratorAction)
   }
 }
 

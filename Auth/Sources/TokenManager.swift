@@ -26,9 +26,12 @@ public final class TokenManager: TokenManagerType, ObservableObject {
     _ = getToken()
   }
   
+  @discardableResult
   public func setToken(_ token: JWTToken?) -> JWTToken? {
     Properties.saveCodable(key: AuthTokenKey, data: token)
-    return getToken()
+    let token: JWTToken? = Properties.loadCodable(key: AuthTokenKey)
+    self.token = token
+    return self.token
   }
   
   public func getToken() -> JWTToken? {

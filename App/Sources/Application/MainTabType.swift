@@ -10,7 +10,8 @@ import DesignSystem
 import DesignSystemFoundation
 import Onboading
 
-enum MainTabType: CaseIterable {
+public enum MainTabType: CaseIterable {
+  
   case Refrigerator // 냉장고
   case IngredientsBox // 재료함
   case Setting

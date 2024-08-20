@@ -8,33 +8,88 @@
 import SwiftUI
 import DesignSystem
 import DesignSystemFoundation
+import Domain
+import Common
+import ComposableArchitecture
 
-public struct RefrigeratorHomeView {
-  public init() {
+// MARK: Properties
+public struct RefrigeratorHomeView: BaseFeatureViewType {
+  
+  public typealias Core = RefrigeratorHomeCore
+  public let store: StoreOf<Core>
+  
+  @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
+  @State private var selectedTab: Int?
+  @State private var isShaking: Bool = false
+  @State private var timer: Timer? // 타이머를 저장할 상태 변수 추가
+
+  
+  public struct ViewState: Equatable {
     
+    var categories: [IngredientCategory]
+    var ingredients: [Ingredient]
+    
+    public init(state: CoreState) {
+      categories = state.categories
+      ingredients = state.ingredients
+    }
+  }
+  
+  public init(
+    _ store: StoreOf<Core> = .init(
+      initialState: Core.State()
+    ){
+      Core()
+    }
+  ) {
+    self.store = store
+    self.viewStore = ViewStore(store, observe: ViewState.init)
   }
   
   private enum Metric {
     static let refrigeratorBackgroundWidthRatio: CGFloat = 273/375
+    static let rotatation: CGFloat = 1
+    static let animationTimeInterval: CGFloat = 0.3
   }
 }
 
+
 extension RefrigeratorHomeView: View {
   public var body: some View {
-    Color.clear
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(
-        ZStack(alignment: .center) {
-          Color.asset(.bgMain)
-          backgroundView()
-        } //: ZStack
-          .ignoresSafeArea(.all)
-      )
-      .overlay(alignment: .top) {
-        infoBoxView(.refrigeratorFilled)
-          .padding(.top, 20)
-          .padding(.horizontal, 20)
+    VStack {
+      infoBoxView(.refrigeratorFilled)
+        .padding(.top, 20)
+        .padding(.horizontal, 20)
+      
+      if let selectedTab {
+        
+      } else {
+        backgroundView()
       }
+    }
+    .ignoresSafeArea(edges: [.horizontal])
+    .onAppear {
+      timer = Timer.scheduledTimer(withTimeInterval: Metric.animationTimeInterval, repeats: true) { _ in
+        Task { @MainActor in
+          withAnimation {
+            isShaking.toggle()
+          }
+        }
+      }
+    }
+    .onDisappear {
+      timer?.invalidate()
+      timer = nil
+    }
+    .background(
+      ZStack(alignment: .center) {
+        Color.asset(.bgMain)
+      } //: ZStack
+    )
+    .overlay(alignment: .top) {
+      
+    }
+    .kerning(-0.6) // 자간 -0.6
   }
 }
 
@@ -46,12 +101,20 @@ extension RefrigeratorHomeView {
       let centerX = geo.size.width / 2
       let centerY = geo.size.height / 2
       
-      Image.asset(.refrigerator)
-        .renderingMode(.original)
-        .resizable()
-        .scaledToFit()
-        .frame(width: width)
-        .position(x: centerX, y: centerY)
+      Button(action: { viewStore.send(.refrigeratorTapped) }) {
+        Image.asset(.refrigerator)
+          .renderingMode(.original)
+          .resizable()
+          .scaledToFit()
+          .frame(width: width)
+          .position(x: centerX, y: centerY)
+          .rotationEffect(isShaking ? .degrees(-Metric.rotatation) : .degrees(Metric.rotatation))
+          .animation(
+            Animation.easeInOut(duration: Metric.animationTimeInterval)
+              .repeatForever(autoreverses: true),
+            value: true
+          )
+      }
     }
   }
   
