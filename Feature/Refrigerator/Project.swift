@@ -11,8 +11,10 @@ import ProjectDescriptionHelpers
 let project = Project.makeFramework(
   name: ModuleNameSpace.Feature.Refrigerator.rawValue,
   dependencies: [
-    .Project.DesignSystem,
     .Project.Commmon,
+    .Project.DesignSystem,
+    .Project.Domain,
+    .ExternalProject.TCA,
     .Project.CNNetwork
   ]
 )
