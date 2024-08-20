@@ -79,8 +79,10 @@ final class AuthServiceImpl: NSObject {
     
     let jwtToken = try await signInWithCNAuthServer(using: idToken)
     
-    guard tokenManager.setToken(jwtToken) != nil else {
-      throw AuthServiceError.tokenStorageFailed
+    try await MainActor.run {
+      guard tokenManager.setToken(jwtToken) != nil else {
+        throw AuthServiceError.tokenStorageFailed
+      }
     }
   }
   
