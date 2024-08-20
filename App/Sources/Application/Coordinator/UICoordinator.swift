@@ -7,23 +7,32 @@
 
 import SwiftUI
 import Auth
+import Dependencies
 
 final class UICoordinator: ObservableObject {
+  
+  static let shared: UICoordinator = .init()
   
   // MARK: Dependencies
   @ObservedObject var tokenManager: TokenManager = .shared
   
-  // MARK: Properties
-  
-  @Published var selectedTab: MainTabType = .IngredientsBox
-  
   var isLoggedIn: Bool {
-    if let token = tokenManager.token,
-       !token.isAccessTokenExpired {
+    if tokenManager.token != nil {
       return true
     }
     return false
   }
   
-  init() {}
+  private init() {}
+}
+
+struct UICoordinatorDependencyKey: DependencyKey {
+  static let liveValue: UICoordinator = UICoordinator.shared
+}
+
+extension DependencyValues {
+  var coordinator: UICoordinator {
+    get { self[UICoordinatorDependencyKey.self] }
+    set { self[UICoordinatorDependencyKey.self] = newValue }
+  }
 }
