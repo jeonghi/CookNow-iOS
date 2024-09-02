@@ -80,9 +80,9 @@ extension StateButtonStyle: ButtonStyle {
         currentState == .progress ? Color.asset(.clear) : config.foreground.toColor()
       )
       .frame(
-        width: buttonSize.width,
         height: buttonSize.height
       )
+      .frame(maxWidth: buttonSize.width)
       .overlay(
         ZStack {
           RoundedRectangle(cornerRadius: 6)

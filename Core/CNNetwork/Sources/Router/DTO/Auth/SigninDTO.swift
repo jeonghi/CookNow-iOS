@@ -8,9 +8,9 @@
 import Foundation
 
 public enum SignInDTO {
+  
   public struct Request: Encodable {
     let idToken: String
-    
     public init(_ idToken: String) {
       self.idToken = idToken
     }

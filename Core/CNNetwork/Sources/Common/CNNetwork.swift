@@ -35,6 +35,7 @@ public final class Network<Target: TargetType>: NetworkType {
                                          _ responseType: R.Type,
                                          logging: Bool = true,
                                          completion: @escaping ((Result<R, Error>) -> Void)) where Target: TargetType, R: Decodable {
+    
     responseData(target) { res, data, error in
       
       if let error = error {
@@ -44,8 +45,13 @@ public final class Network<Target: TargetType>: NetworkType {
       
       if let data {
         do {
-          let decodedData = try JSONDecoder().decode(responseType, from: data)
-          completion(.success(decodedData))
+          let decodedData = try JSONDecoder().decode(CommonDTO.Response<R>.self, from: data)
+          guard let data = decodedData.data else {
+            CNLog.e("Error decoding type: \(type(of: responseType)) + \(decodedData.message)")
+            completion(.failure(CNNetworkError()))
+            return
+          }
+          completion(.success(data))
           return
         } catch {
           CNLog.e("Error decoding type: \(type(of: responseType)) + \(error)")
@@ -156,8 +162,14 @@ public final class Network<Target: TargetType>: NetworkType {
             continuation.resume(throwing: afError)
           } else if let data = response.data {
             do {
-              let decodedData = try JSONDecoder().decode(R.self, from: data)
-              continuation.resume(returning: decodedData)
+              let decodedData = try JSONDecoder().decode(CommonDTO.Response<R>.self, from: data)
+              guard let data = decodedData.data else {
+                CNLog.e("Error decoding type: \(type(of: responseType)) + \(decodedData.message)")
+                continuation.resume(throwing: CNNetworkError())
+                return
+              }
+              
+              continuation.resume(returning: data)
             } catch {
               CNLog.e("Error decoding type: \(type(of: responseType)) + \(error)")
               continuation.resume(throwing: error)

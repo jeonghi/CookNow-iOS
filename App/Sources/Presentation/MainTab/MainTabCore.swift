@@ -16,7 +16,6 @@ import Setting
 public struct MainTabCore: Reducer {
   
   // MARK: Dependencies
-  @Dependency(\.coordinator) private var coordinator
   
   // MARK: Constructor
   public init() {

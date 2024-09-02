@@ -12,7 +12,6 @@ public struct OnboadingCore {
   
   // MARK: Dependency
   @Dependency(\.mainQueue) var mainQueue
-  @Dependency(\.authService) var authService
   
   // MARK: constructor
   public init() {}
@@ -72,24 +71,10 @@ extension OnboadingCore: Reducer {
         
         // MARK: Button Action
       case .appleSignInButtonTapped:
-        
-        return .run { @MainActor send in
-          do {
-            try await authService.appleSignIn()
-          } catch {
-            
-          }
-        }
+        return .none
         
       case .googleSignInButtonTapped:
-        
-        return .run { @MainActor send in
-          do {
-            try await authService.googleSignIn()
-          } catch {
-            
-          }
-        }
+        return .none
         
         // MARK: Binding
       case .updateAnimationProgressTime(let updated):

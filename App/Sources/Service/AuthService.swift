@@ -16,16 +16,18 @@ import Common
 import Auth
 import Dependencies
 
+@MainActor
 protocol AuthServiceType {
   func googleSignIn() async throws
   func googleSignOut() async throws
   func appleSignIn() async throws
   func appleSignOut() async throws
+  func validateToken() async throws
 }
 
+@MainActor
 struct AuthServiceDependencyKey: DependencyKey {
   static let liveValue: AuthServiceType = AuthServiceImpl.shared
-  static let testValue: AuthServiceType = AuthServiceStub()
 }
 
 enum AuthServiceError: Error {
@@ -39,29 +41,14 @@ extension DependencyValues {
   }
 }
 
-
-final class AuthServiceStub: AuthServiceType {
-  func googleSignIn() {
-    
-  }
-  
-  func googleSignOut() {
-    
-  }
-  
-  func appleSignIn() {
-    
-  }
-  
-  func appleSignOut() {
-    
-  }
-}
-
 final class AuthServiceImpl: NSObject {
   
   private var network: CNNetwork.Network<CNNetwork.AuthAPI>
   private let tokenManager = TokenManager.shared
+  
+  static let shared: AuthServiceType = AuthServiceImpl()
+  
+  private var continuation: CheckedContinuation<Void, Error>?
   
   // Unhashed nonce.
   fileprivate var currentNonce: String?
@@ -101,13 +88,6 @@ final class AuthServiceImpl: NSObject {
     }
   }
   
-  // TODO: 액세스 토큰 유효성 검증
-  private func checkAccessTokenWithCNAuthServer(using token: String) async throws -> Bool {
-    try await withCheckedThrowingContinuation { continuation in
-      
-    }
-  }
-  
   private func signOutWithCNAuthServer() async throws {
     try await withCheckedThrowingContinuation { continuation in
       network.responseData(.signOut, SignOutDTO.Response.self) { result in
@@ -122,17 +102,16 @@ final class AuthServiceImpl: NSObject {
   }
 }
 
+@MainActor
 extension AuthServiceImpl: AuthServiceType {
-  
-  static let shared: AuthServiceType = AuthServiceImpl()
-  
+    
   func googleSignIn() async throws {
     
     
     // As you’re not using view controllers to retrieve the presentingViewController, access it through
     // the shared instance of the UIApplication
-    guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
-    guard let rootViewController = await windowScene.windows.first?.rootViewController else { return }
+    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+    guard let rootViewController = windowScene.windows.first?.rootViewController else { return }
     
     guard let clientID = FirebaseApp.app()?.options.clientID else { return }
     
@@ -168,12 +147,16 @@ extension AuthServiceImpl: AuthServiceType {
     }
   }
   
-  func appleSignIn() {
-    startSignInWithAppleFlow()
+  func appleSignIn() async throws {
+    try await startSignInWithAppleFlow()
   }
   
   func appleSignOut() {
     
+  }
+  
+  func validateToken() async throws {
+    _ = try await network.responseData(.validateToken, ValidateDTO.Response.self)
   }
 }
 
@@ -219,18 +202,23 @@ private extension AuthServiceImpl {
   }
   
   
-  func startSignInWithAppleFlow() {
-    let nonce = randomNonceString()
-    currentNonce = nonce
-    let appleIDProvider = ASAuthorizationAppleIDProvider()
-    let request = appleIDProvider.createRequest()
-    request.requestedScopes = [.fullName, .email] // 이름과 email요청
-    request.nonce = sha256(nonce)
-    
-    let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-    authorizationController.delegate = self
-    authorizationController.presentationContextProvider = self
-    authorizationController.performRequests()
+  func startSignInWithAppleFlow() async throws {
+    return try await withCheckedThrowingContinuation { continuation in
+      let nonce = randomNonceString()
+      currentNonce = nonce
+      let appleIDProvider = ASAuthorizationAppleIDProvider()
+      let request = appleIDProvider.createRequest()
+      request.requestedScopes = [.fullName, .email] // 이름과 email요청
+      request.nonce = sha256(nonce)
+      
+      let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+      authorizationController.delegate = self
+      authorizationController.presentationContextProvider = self
+      authorizationController.performRequests()
+      
+      // delegate 메서드에서 continuation을 resume하게 만듦.
+      self.continuation = continuation
+    }
   }
 }
 
@@ -266,7 +254,12 @@ extension AuthServiceImpl: ASAuthorizationControllerDelegate, ASAuthorizationCon
       
       // Sign in with Firebase. (Used Task for Bridging Sync and Async)
       Task {
-        try await signInWithFirebase(using: credential)
+        do {
+          try await signInWithFirebase(using: credential)
+          continuation?.resume(returning: ())
+        } catch {
+          continuation?.resume(throwing: error)
+        }
       }
     }
   }

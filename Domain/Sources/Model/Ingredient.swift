@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Common
 
 /// 식재료 모델
 public struct Ingredient: Identifiable, Equatable, Hashable {
@@ -18,27 +17,31 @@ public struct Ingredient: Identifiable, Equatable, Hashable {
   public let name: String
   public let imageUrl: URL?
   public let category: IngredientCategory.ID?
+  public var estimatedExpirationDate: Date?
   
   // MARK: Initializer
   public init(
     id: String = UUID().uuidString,
     name: String,
     imageUrl: String? = nil,
-    category: IngredientCategory.ID? = nil
+    category: IngredientCategory.ID? = nil,
+    estimatedExpirationDate: Date? = nil
   ) {
-    self.init(id: id, name: name, imageUrl: imageUrl?.asUrl(), category: category)
+    self.init(id: id, name: name, imageUrl: URL(string: imageUrl ?? ""), category: category, estimatedExpirationDate: estimatedExpirationDate)
   }
   
   public init(
     id: String = UUID().uuidString,
     name: String,
     imageUrl: URL? = nil,
-    category: IngredientCategory.ID? = nil
+    category: IngredientCategory.ID? = nil,
+    estimatedExpirationDate: Date? = nil
   ) {
     self.id = id
     self.name = name
     self.imageUrl = imageUrl
     self.category = category
+    self.estimatedExpirationDate = estimatedExpirationDate
   }
 }
 

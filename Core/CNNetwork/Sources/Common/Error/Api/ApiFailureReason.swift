@@ -8,7 +8,7 @@
 import Foundation
 
 /// API 관련 에러 종류
-enum ApiFailureReason: Int, Codable {
+public enum ApiFailureReason: Int, Codable {
   
   /// 유효하지 않은 키
   case InvalidKey = 420
@@ -42,7 +42,7 @@ enum ApiFailureReason: Int, Codable {
 }
 
 extension ApiFailureReason: LocalizedError {
-  var errorDescription: String? {
+  public var errorDescription: String? {
     switch self {
     case .InvalidKey: return "Invalid Key"
     case .ExcessiveCall: return "Excessive Call"

@@ -10,17 +10,30 @@ import Common
 
 public enum IngredientDTO {
   
-  public typealias Response = [Category]
+  public struct Response: Decodable {
+    
+    public let categories: [IngredientDTO.Category]
+    
+    enum CodingKeys: String, CodingKey {
+      case categories = "categoryList"
+    }
+    
+    public init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      self.categories = try container.decode([Category].self, forKey: .categories)
+    }
+  }
   
   public struct Category: Decodable {
+    
     public let id: String
     public let name: String
     public let ingredients: [Ingredient]
     
-    public enum CodingKeys: CodingKey {
+    public enum CodingKeys: String, CodingKey {
       case id
       case name
-      case ingredients
+      case ingredients = "ingredientList"
     }
     
     public init(id: String, name: String, ingredients: [Ingredient] = []) {
@@ -31,31 +44,35 @@ public enum IngredientDTO {
     
     public init(from decoder: any Decoder) throws {
       let container: KeyedDecodingContainer<IngredientDTO.Category.CodingKeys> = try decoder.container(keyedBy: IngredientDTO.Category.CodingKeys.self)
-      self.id = try container.decode(String.self, forKey: IngredientDTO.Category.CodingKeys.id)
+      let id = try container.decode(Int.self, forKey: IngredientDTO.Category.CodingKeys.id)
+      self.id = String(id)
       self.name = try container.decode(String.self, forKey: IngredientDTO.Category.CodingKeys.name)
       self.ingredients = try container.decode([IngredientDTO.Ingredient].self, forKey: IngredientDTO.Category.CodingKeys.ingredients)
     }
   }
   
   public struct Ingredient: Decodable {
-    public let ingredientId: String
-    public let categoryId: String
+    
+    public let id: String
     public let name: String
     public let imageUrl: URL?
+    public let expirationDate: Date
     
-    enum CodingKeys: CodingKey {
-      case ingredientId
-      case categoryId
+    enum CodingKeys: String, CodingKey {
+      case id
       case name
       case imageUrl
+      case expirationDate
     }
     
     public init(from decoder: any Decoder) throws {
       let container: KeyedDecodingContainer<IngredientDTO.Ingredient.CodingKeys> = try decoder.container(keyedBy: IngredientDTO.Ingredient.CodingKeys.self)
-      self.ingredientId = try container.decode(String.self, forKey: IngredientDTO.Ingredient.CodingKeys.ingredientId)
-      self.categoryId = try container.decode(String.self, forKey: IngredientDTO.Ingredient.CodingKeys.categoryId)
+      let id = try container.decode(Int.self, forKey: IngredientDTO.Ingredient.CodingKeys.id)
+      self.id = String(id)
       self.name = try container.decode(String.self, forKey: IngredientDTO.Ingredient.CodingKeys.name)
       self.imageUrl = try container.decodeIfPresent(String.self, forKey: IngredientDTO.Ingredient.CodingKeys.imageUrl)?.asUrl()
+      let daysToAdd = try container.decode(Int.self, forKey: .expirationDate)
+      self.expirationDate = Calendar.current.date(byAdding: .day, value: daysToAdd, to: Date()) ?? Date()
     }
   }
 }

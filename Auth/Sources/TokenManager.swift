@@ -44,5 +44,6 @@ public final class TokenManager: TokenManagerType, ObservableObject {
   public func deleteToken() {
     Properties.delete(AuthTokenKey)
     self.token = nil
+    NotificationCenter.default.post(name: .tokenExpired, object: nil)
   }
 }

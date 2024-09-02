@@ -7,8 +7,10 @@
 
 import Foundation
 
-enum HTTPHeader: String {
-    case authorization = "Authorization"
-    case contentType = "Content-Type"
-    case json = "application/json"
+public enum HTTPHeader: String {
+  case authorization = "Authorization"
+  case contentType = "Content-Type"
+  case json = "application/json"
+  case acceptLanguage = "Accept-Language"
+  case bearer = "Bearer"
 }

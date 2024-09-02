@@ -60,11 +60,9 @@ extension MainTabView: View {
           switch tabType {
           case .Refrigerator:
             NavigationWrapper {
-              LazyNavigationView(
                 RefrigeratorHomeView(refrigeratorStore)
                   .navigationTitle(tabType.title)
                   .navigationBarTitleDisplayMode(.inline)
-              )
             }
           case .IngredientsBox:
             NavigationWrapper {
@@ -75,11 +73,9 @@ extension MainTabView: View {
             }
           case .Setting:
             NavigationWrapper {
-              LazyNavigationView(
                 SettingView()
                   .navigationTitle(tabType.title)
                   .navigationBarTitleDisplayMode(.inline)
-              )
             }
           }
         }

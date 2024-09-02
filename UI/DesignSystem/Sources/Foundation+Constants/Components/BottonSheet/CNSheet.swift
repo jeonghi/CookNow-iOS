@@ -27,6 +27,7 @@ public extension View {
         .background(Color.asset(.white))
       } customize: {
         $0
+          .isOpaque(true)
           .type(.toast)
           .position(.bottom)
           .dragToDismiss(true)
@@ -56,6 +57,7 @@ public extension View {
         .background(Color.asset(.white))
       } customize: {
         $0
+          .isOpaque(true)
           .position(.bottom)
           .dragToDismiss(true)
           .closeOnTap(false)

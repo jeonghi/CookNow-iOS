@@ -10,6 +10,11 @@ let project = Project.makeApp(
     .Project.Onboarding,
     .Project.Setting,
     .Project.IngredientBox,
-    .Project.Refrigerator
+    .Project.Refrigerator,
+    .ExternalProject.Google.FirebaseAnalytics,
+    .ExternalProject.Google.FirebaseAuth,
+    .ExternalProject.Google.GoogleSignIn,
+    .Project.Auth,
+    .Project.CNNetwork
   ]
 )

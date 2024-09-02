@@ -25,6 +25,7 @@ public struct IngredientBoxCore: Reducer {
     
     var isLoading: Bool
     var searchText: String = ""
+    var showingSheet: Bool = false
     
     // 선택된 카테고리
     var selectedCategory: IngredientCategory?
@@ -41,6 +42,10 @@ public struct IngredientBoxCore: Reducer {
     var selectedingredientBox: [Ingredient] = []
     var alertState: AlertState<Action>?
     
+    var showingNext: Bool = false
+    
+    var ingredientInputFormState: IngredientInputFormCore.State?
+    
     public init(
       isLoading: Bool = false
     ) {
@@ -56,17 +61,25 @@ public struct IngredientBoxCore: Reducer {
     case onDisappear
     case isLoading(Bool)
     
+    case showingNext(Bool)
+    case showingSheet(Bool)
     case updateSearchText(String)
     case selectCategory(IngredientCategory?)
     case putInIngredient(Ingredient)
     case putOutIngredient(Ingredient)
     case updateCategories([IngredientCategory])
+    case ingredientBoxTapped
+    case continueSelectionButtonTapped
+    case finishSelectionButtonTapped
     
     /// Networking
     case requestGetAllIngredients
     
     case alertError(Error)
     case updateAlertState(AlertState<Action>?)
+    
+    /// Sub Reducer
+    case ingredientInputFormAction(IngredientInputFormCore.Action)
   }
   
   private enum CancelID: CaseIterable, Hashable {
@@ -87,6 +100,25 @@ public struct IngredientBoxCore: Reducer {
         state.isLoading = isLoading
         return .none
         
+        
+      case .showingNext(let showing):
+        
+        if showing {
+          let ingredientStorageList: [IngredientStorage] = state.selectedingredientBox.map {
+            .init(ingredient: $0, expirationDate: $0.estimatedExpirationDate)
+          }
+          
+          state.ingredientInputFormState = .init(ingredientStorageList: ingredientStorageList)
+        } else {
+          state.ingredientInputFormState = nil
+        }
+        
+        state.showingNext = showing
+        return .none
+        
+      case .showingSheet(let showing):
+        state.showingSheet = showing
+        return .none
       case .updateSearchText(let newSearchText):
         state.searchText = newSearchText
         return .none
@@ -104,7 +136,10 @@ public struct IngredientBoxCore: Reducer {
       case .updateCategories(let updated):
         state.categories = updated
         return .none
-        
+      case .ingredientBoxTapped:
+        return .run { send in
+          await send(.showingSheet(true))
+        }
         /// Networking
       case .requestGetAllIngredients:
         return .run { send in
@@ -112,6 +147,7 @@ public struct IngredientBoxCore: Reducer {
           do {
             let categories = try await ingredientService.getAllCategoriesWithIngredients()
             await send(.updateCategories(categories))
+            await send(.selectCategory(categories.first))
           } catch {
             await send(.alertError(error))
           }
@@ -138,7 +174,23 @@ public struct IngredientBoxCore: Reducer {
       case .updateAlertState(let updated):
         state.alertState = updated
         return .none
+      case .continueSelectionButtonTapped:
+        return .run { send in
+          await send(.showingSheet(false))
+        }
+      case .finishSelectionButtonTapped:
+        
+        return .run { send in
+          await send(.showingNext(true))
+          await send(.showingSheet(false))
+        }
+        
+      case .ingredientInputFormAction(let actions):
+        return .none
       }
+    }
+    .ifLet(\.ingredientInputFormState, action: /Action.ingredientInputFormAction) {
+      IngredientInputFormCore()
     }
   }
 }

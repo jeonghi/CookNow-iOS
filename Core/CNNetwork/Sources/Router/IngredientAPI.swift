@@ -12,16 +12,20 @@ public enum IngredientAPI {
   case getAllCategories
   case getAllIngedients
   case findIngredients(categoryId: String)
+  case saveMyIngredients(SaveMyIngredientDTO.Request)
+  case getMyIngredients(StorageType)
 }
 
 extension IngredientAPI: TargetType {
   
   public var baseURL: String {
-    Constants.baseUrl
+    Constants.baseUrl + "/api/v1"
   }
   
   public var method: Alamofire.HTTPMethod {
     switch self {
+    case .saveMyIngredients:
+      return .post
     default:
       return .get
     }
@@ -32,18 +36,20 @@ extension IngredientAPI: TargetType {
     case .getAllCategories:
       return "/categories"
     case .getAllIngedients:
-      return "/category/all/ingredients"
+      return "/categories/ingredients"
     case .findIngredients(let categoryId):
       return "/category/\(categoryId)/ingredients"
+    case .saveMyIngredients:
+      return "/user/3/items"
+    case .getMyIngredients(let storageType):
+      return "/user/3/items?type=\(storageType.rawValue)"
     }
   }
   
   public var header: [String : String] {
     switch self {
     default:
-      return [
-        HTTPHeader.contentType.rawValue: HTTPHeader.json.rawValue
-      ]
+      return [:]
     }
   }
   
@@ -56,8 +62,9 @@ extension IngredientAPI: TargetType {
   }
   
   public var body: Data? {
-    let encoder = JSONEncoder()
     switch self {
+    case .saveMyIngredients(let ingredients):
+      return try? JSONEncoder().encode(ingredients)
     default:
       return nil
     }

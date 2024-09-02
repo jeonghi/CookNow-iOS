@@ -8,7 +8,7 @@
 import Foundation
 
 /// 클라이언트 에러 종류
-enum ClientFailureReason {
+public enum ClientFailureReason {
   
   /// 기타 에러
   case Unknown

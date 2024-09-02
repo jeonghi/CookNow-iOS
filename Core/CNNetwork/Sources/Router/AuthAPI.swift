@@ -15,6 +15,8 @@ public enum AuthAPI {
   case signOut
   /// 토큰 갱신하기
   case refreshToken
+  /// 토큰 검증하기
+  case validateToken
 }
 
 extension AuthAPI: TargetType {
@@ -31,6 +33,8 @@ extension AuthAPI: TargetType {
       return .post
     case .refreshToken:
       return .post
+    case .validateToken:
+      return .post
     }
   }
   
@@ -42,6 +46,8 @@ extension AuthAPI: TargetType {
       return "/oauth/sign-out"
     case .refreshToken:
       return "/oauth/refresh"
+    case .validateToken:
+      return "/oauth/verify-token"
     }
   }
   
@@ -50,11 +56,6 @@ extension AuthAPI: TargetType {
     case .signIn(let request):
       return [
         HTTPHeader.authorization.rawValue: "Bearer \(request.idToken)",
-        HTTPHeader.contentType.rawValue: HTTPHeader.json.rawValue
-      ]
-    case .signOut:
-      return [
-        HTTPHeader.contentType.rawValue: HTTPHeader.json.rawValue
       ]
     default:
       return [:]
@@ -79,9 +80,13 @@ extension AuthAPI: TargetType {
   
   public var sessionType: SessionType {
     switch self {
-    case .signIn, .signOut:
+    case .signIn:
       return .Auth
+    case .signOut:
+      return .AuthApi
     case .refreshToken:
+      return .Auth
+    case .validateToken:
       return .AuthApi
     }
   }

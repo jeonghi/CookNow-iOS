@@ -55,13 +55,13 @@ public struct IngredientStorage: Identifiable, Hashable, Equatable {
     ingredient: Ingredient,
     storageType: StorageType = .refrigerator,
     quantity: Int = 1,
-    expirationDate: Date = Date()
+    expirationDate: Date? = Date()
   ) {
     self.id = UUID()
     self.ingredient = ingredient
     self.storageType = storageType
     self._quantity = quantity
-    self._expirationDate = expirationDate
+    self._expirationDate = expirationDate ?? Date()
   }
   
   var formattedExpirationDate: String {

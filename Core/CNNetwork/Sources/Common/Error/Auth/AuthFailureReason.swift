@@ -8,7 +8,7 @@
 import Foundation
 
 /// 인증 관련 에러 종류
-enum AuthFailureReason: Int, Error, Codable {
+public enum AuthFailureReason: Int, Error, Codable {
   
   /// 유효하지 않은 키
   case InvalidKey = 420
@@ -45,7 +45,7 @@ enum AuthFailureReason: Int, Error, Codable {
 }
 
 extension AuthFailureReason: LocalizedError {
-  var errorDescription: String? {
+  public var errorDescription: String? {
     switch self {
     case .InvalidKey: return "Invalid Key"
     case .ExcessiveCall: return "Excessive Call"

@@ -14,6 +14,7 @@ public struct IngredientInputFormCore: Reducer {
   public typealias FormCard = IngredientInputFormCardCore
   
   // MARK: Dependencies
+  @Dependency(\.ingredientService) private var ingredientService
   
   // MARK: Constructor
   public init() {
@@ -27,17 +28,27 @@ public struct IngredientInputFormCore: Reducer {
     var formCardStateList: IdentifiedArrayOf<FormCard.State>
     var scrolledIngredientStorageId: IngredientStorage.ID?
     var dateSelectionSheetState: DateSelectionSheetCore.State?
+    var isDismiss: Bool = false
+    
+    var ingredientStorageList: [IngredientStorage] {
+      formCardStateList.map {
+        $0.ingredientStorage
+      }
+    }
     
     public init(isLoading: Bool = false, ingredientStorageList: [IngredientStorage] = []) {
       self.isLoading = isLoading
 #if(DEBUG)
-      self.formCardStateList = [
-        FormCard.State(ingredientStorage: .dummyData),
-        FormCard.State(ingredientStorage: .dummyData)
-      ]
+      self.formCardStateList = IdentifiedArray(
+        uniqueElements: ingredientStorageList.map { FormCard.State(ingredientStorage: $0) }
+      )
+//      self.formCardStateList = [
+//        FormCard.State(ingredientStorage: .dummyData),
+//        FormCard.State(ingredientStorage: .dummyData)
+//      ]
 #else
       self.formCardStateList = IdentifiedArray(
-        uniqueElements: formCardStateList.map { FormCard.State(ingredientStorage: $0) }
+        uniqueElements: ingredientStorageList.map { FormCard.State(ingredientStorage: $0) }
       )
 #endif
       self.scrolledIngredientStorageId = self.formCardStateList.first?.id
@@ -60,6 +71,7 @@ public struct IngredientInputFormCore: Reducer {
     
     // MARK: View defined Action
     case scrollTo(IngredientStorage.ID?) // 스크롤 이동
+    case dismiss
     
     // MARK: Date Selection
     case dateSelectionSheetPresented(IngredientStorage.ID)
@@ -73,12 +85,14 @@ public struct IngredientInputFormCore: Reducer {
     case doneButtonTapped
     
     // MARK: Networking
+    case requestSaveMyIngredients
   }
   
   // MARK: Reduce
   public var body: some ReducerOf<Self> {
     
     Reduce { state, action in
+      
       switch action {
         
         // MARK: Life Cycle
@@ -96,6 +110,9 @@ public struct IngredientInputFormCore: Reducer {
       case .scrollTo(let id):
         state.scrolledIngredientStorageId = id
         return .none
+      case .dismiss:
+        state.isDismiss = true
+        return .none
         
         // MARK: Date Selection
       case .dateSelectionSheetPresented:
@@ -107,11 +124,13 @@ public struct IngredientInputFormCore: Reducer {
         
         // MARK: New Ingredient
       case .addIngredientButtonTapped:
-        return .none
+        return .run { send in
+          await send(.dismiss)
+        }
         
         // MARK: Done Button Tapped
       case .doneButtonTapped:
-        return .send(.isLoading(true))
+        return .send(.requestSaveMyIngredients)
         
         
         // MARK: Child Reducer Action
@@ -159,6 +178,22 @@ public struct IngredientInputFormCore: Reducer {
       case let .updateDateSelectionSheetState(updated):
         state.dateSelectionSheetState = updated
         return .none
+        
+        // MARK: Networking
+      case .requestSaveMyIngredients:
+        
+        let ingredientStorageList = state.ingredientStorageList
+        return .run { send in
+          await send(.isLoading(true))
+          
+          do {
+            try await ingredientService.saveMyIngredients(ingredientStorage: ingredientStorageList)
+            await send(.isLoading(false))
+            await send(.dismiss)
+          } catch {
+            await send(.isLoading(false))
+          }
+        }
       }
     }
     .forEach(\.formCardStateList, action: /Action.formCardAction(id:action:)) {

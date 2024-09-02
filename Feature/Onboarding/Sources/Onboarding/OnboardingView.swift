@@ -99,7 +99,7 @@ extension OnboardingView {
         bundle: .module
       )
     )
-    .animationSpeed(0.2)
+    .animationSpeed(0.7)
     .playing()
     .animationDidFinish({ completed in
       viewStore.send(.isAnimating(false))

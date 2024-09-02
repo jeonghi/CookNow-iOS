@@ -9,10 +9,10 @@ import Common
 import Foundation
 import Alamofire
 
-let API = Api.shared
+public let API = Api.shared
 
 
-final class Api {
+public final class Api {
   static let shared = Api()
   
   let encoding: URLEncoding
@@ -26,11 +26,9 @@ final class Api {
   }
 }
 
-extension Api {
+public extension Api {
   
   private func initSession() {
-    
-    let apiSessionConfiguration: URLSessionConfiguration = URLSessionConfiguration.default
     
     var eventMonitors: [EventMonitor] = []
     
@@ -38,10 +36,32 @@ extension Api {
     eventMonitors.append(AFLogger.shared)
     #endif
     
+    // Api sesssion
+    
+    let apiSessionConfiguration: URLSessionConfiguration = URLSessionConfiguration.default
+    
     addSession(type: .Api, session: Session(configuration: apiSessionConfiguration, interceptor: ApiRequestAdapter(), eventMonitors: eventMonitors))
     
+    // Auth session
+    
     let authSessionConfiguration : URLSessionConfiguration = URLSessionConfiguration.default
+    
     addSession(type: .Auth, session: Session(configuration: authSessionConfiguration, interceptor: ApiRequestAdapter(), eventMonitors: eventMonitors))
+    
+    // MARK: AuthApi session
+    
+    let authApiSessionConfiguration : URLSessionConfiguration = URLSessionConfiguration.default
+    
+    let authApiInterceptor = Interceptor(adapter: AuthApiRequestAdapter(), retrier: AuthApiRequestRetrier())
+    
+    addSession(
+      type: .AuthApi,
+      session: Session(
+        configuration: authApiSessionConfiguration,
+        interceptor: authApiInterceptor,
+        eventMonitors: eventMonitors
+      )
+    )
   }
   
   func addSession(type: SessionType, session: Session) {
@@ -55,7 +75,7 @@ extension Api {
   }
 }
 
-extension Api {
+public extension Api {
   
   func getCommonError(error: Error) -> CNNetworkError? {
     if let afError = error as? AFError {

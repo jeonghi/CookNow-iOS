@@ -3,6 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -22,19 +23,19 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-CL-mLe">
-                                <rect key="frame" x="113" y="336" width="167" height="180"/>
+                                <rect key="frame" x="118" y="341.33333333333331" width="157" height="169.33333333333331"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="fzr-CL-mLe" secondAttribute="height" multiplier="167:180" id="sB3-J3-ciZ"/>
+                                    <constraint firstAttribute="width" secondItem="fzr-CL-mLe" secondAttribute="height" multiplier="167:180" id="nli-OC-d36"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" name="bg300"/>
                         <constraints>
                             <constraint firstItem="Bcu-3y-fUS" firstAttribute="centerX" secondItem="obG-Y5-kRd" secondAttribute="centerX" id="5cz-MP-9tL"/>
                             <constraint firstItem="fzr-CL-mLe" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="8Pp-Vz-Ywg"/>
-                            <constraint firstItem="fzr-CL-mLe" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.424936" id="DbV-Xa-Tqu"/>
-                            <constraint firstItem="obG-Y5-kRd" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" constant="20" symbolic="YES" id="SfN-ll-jLj"/>
+                            <constraint firstItem="fzr-CL-mLe" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.4" id="DbV-Xa-Tqu"/>
+                            <constraint firstItem="obG-Y5-kRd" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" symbolic="YES" id="SfN-ll-jLj"/>
                             <constraint firstAttribute="bottom" secondItem="obG-Y5-kRd" secondAttribute="bottom" constant="20" id="Y44-ml-fuU"/>
                             <constraint firstItem="fzr-CL-mLe" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="ox7-eC-eUv"/>
                         </constraints>
@@ -47,5 +48,8 @@
     </scenes>
     <resources>
         <image name="logo" width="167" height="180"/>
+        <namedColor name="bg300">
+            <color red="1" green="0.96862745098039216" blue="0.90196078431372551" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>

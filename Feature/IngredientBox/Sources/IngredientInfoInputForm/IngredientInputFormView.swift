@@ -22,6 +22,7 @@ public struct IngredientInputFormView: BaseFeatureViewType {
   
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   @State private var scrollProxy: ScrollViewProxy?
+  @Environment(\.dismiss) private var dismiss
   
   public struct ViewState: Equatable {
     var formCardStateList: IdentifiedArrayOf<FormCard.State>
@@ -30,11 +31,13 @@ public struct IngredientInputFormView: BaseFeatureViewType {
     var isLoading: Bool
     var doneButtonEnable: Bool { formCardStateList.count > 0 && !isLoading }
     var isIngredientEmpty: Bool { formCardStateList.count <= 0 }
+    var isDismiss: Bool
     public init(state: CoreState) {
       formCardStateList = state.formCardStateList
       dateSelectionSheetState = state.dateSelectionSheetState
       scrolledIngredientStorageId = state.scrolledIngredientStorageId
       isLoading = state.isLoading
+      isDismiss = state.isDismiss
     }
   }
   
@@ -70,12 +73,18 @@ private extension ButtonSize {
 extension IngredientInputFormView: View {
   
   public var body: some View {
-    VStack {
+    
+    if viewStore.isDismiss {
+      dismiss()
+    }
+    
+    return VStack {
       VStack(spacing: Metric.infoLabelAndAdBannerSpacing) {
         introductionSection()
         adSection()
       }
       .padding(.horizontal, Metric.contentHorizontalPadding)
+      .padding(.top, 10)
       
       ScrollView(.vertical) {
         Group {
@@ -118,8 +127,8 @@ extension IngredientInputFormView: View {
       }
     }
     .kerning(-0.6)
+    .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding, safeAreaPadding: Metric.doneButtonBottomPadding)
     .cnLoading(viewStore.isLoading)
-    .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding)
   }
 }
 
@@ -201,7 +210,7 @@ private extension IngredientInputFormView {
   
   @ViewBuilder
   func introductionLabel() -> some View {
-    Text("내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!")
+    Text("현재 적용되어있는 유통기한은 블라블라(?) 내 냉장고에 있는 재료들을\n선택하고 정보를 입력해보세요!(?>?_)")
       .multilineTextAlignment(.leading)
       .lineLimit(2)
       .font(.asset(.caption))

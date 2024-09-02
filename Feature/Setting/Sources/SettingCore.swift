@@ -80,7 +80,6 @@ public struct SettingCore: Reducer {
         
       case .logoutConfirmed:
         state.showingLogoutAlert = false
-        print("User logged out")
         tokenManager.deleteToken()
         return .none
         

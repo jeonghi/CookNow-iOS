@@ -12,6 +12,7 @@ let project = Project.makeLibrary(
   name: ModuleNameSpace.Core.CNNetwork.rawValue,
   dependencies: [
     .ExternalProject.Alamofire,
-    .Project.Commmon
+    .Project.Commmon,
+    .Project.Auth
   ]
 )

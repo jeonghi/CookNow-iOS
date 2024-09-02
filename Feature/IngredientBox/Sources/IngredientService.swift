@@ -14,6 +14,7 @@ import Domain
 protocol IngredientServiceType {
   func getAllCategories() async throws -> [IngredientCategory]
   func getAllCategoriesWithIngredients() async throws -> [IngredientCategory]
+  func saveMyIngredients(ingredientStorage: [IngredientStorage]) async throws
 }
 
 struct IngredientServiceDependencyKey: DependencyKey {
@@ -27,17 +28,6 @@ extension DependencyValues {
   var ingredientService: IngredientServiceType {
     get { self[IngredientServiceDependencyKey.self] }
     set { self[IngredientServiceDependencyKey.self] = newValue }
-  }
-}
-
-
-final class IngredientServiceStub: IngredientServiceType {
-  func getAllCategories() async -> [IngredientCategory] {
-    return []
-  }
-  
-  func getAllCategoriesWithIngredients() async throws -> [IngredientCategory] {
-    return []
   }
 }
 
@@ -63,6 +53,17 @@ extension IngredientServiceImpl: IngredientServiceType {
     
     return ingredientDTO.toModel()
   }
+  
+  func saveMyIngredients(ingredientStorage: [IngredientStorage]) async throws {
+    
+    let itemList: [SaveMyIngredientDTO.Request.Item] = ingredientStorage.map {
+      .init(ingredientId: $0.ingredient.id, quantity: $0.quantity, expirationDate: $0.expirationDate, storageType: .room)
+    }
+    
+    let request: SaveMyIngredientDTO.Request = .init(itemList: itemList)
+    
+    _ = try await network.responseData(.saveMyIngredients(request), SaveMyIngredientDTO.Response.self)
+  }
 }
 
 
@@ -71,27 +72,22 @@ extension IngredientDTO.Response: Mappable {
   public typealias ModelType = [IngredientCategory]
   
   public func toModel() -> [Domain.IngredientCategory] {
-    self
-      .map { category in
-        
-        let ingredients: [Domain.Ingredient] = category.ingredients.map { ingredient in
-          return .init(
-            id: ingredient.ingredientId,
-            name: ingredient.name,
-            imageUrl: ingredient.imageUrl,
-            category: ingredient.categoryId
-          )
-        }
-        
+    self.categories.map { category in
+      let ingredients: [Domain.Ingredient] = category.ingredients.map { ingredient in
         return .init(
-          id: category.id,
-          catergoryName: category.name,
-          ingredients: ingredients
+          id: ingredient.id,
+          name: ingredient.name,
+          imageUrl: ingredient.imageUrl,
+          category: category.id,
+          estimatedExpirationDate: ingredient.expirationDate
         )
       }
-  }
-  
-  public static func fromModel(_ model: [Domain.IngredientCategory]) -> Array<Element> {
-    return []
+      
+      return .init(
+        id: category.id,
+        catergoryName: category.name,
+        ingredients: ingredients
+      )
+    }
   }
 }

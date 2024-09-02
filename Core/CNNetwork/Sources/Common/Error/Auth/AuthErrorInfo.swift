@@ -10,7 +10,7 @@ import Foundation
 /// AuthAPI 호출 시 발생하는 에러 정보입니다.
 /// ## SeeAlso
 /// - ``AuthFailureReason``
-struct AuthErrorInfo: Codable {
+public struct AuthErrorInfo: Codable {
   
   /// 에러 메시지
   let message: String

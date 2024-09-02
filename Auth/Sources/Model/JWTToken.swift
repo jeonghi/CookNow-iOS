@@ -10,7 +10,7 @@ import Foundation
 public struct JWTToken: Codable {
   
   /// 액세스 토큰
-  let accessToken: String
+  public let accessToken: String
   
   /// 액세스 토큰의 남은 만료시간 (단위: 초)
   let expiresIn: TimeInterval
@@ -19,7 +19,7 @@ public struct JWTToken: Codable {
   let expiredAt: Date
   
   /// 리프레시 토큰
-  let refreshToken: String
+  public let refreshToken: String
   
   /// 리프레시 토큰의 남은 만료시간 (단위: 초)
   let refreshTokenExpiresIn: TimeInterval

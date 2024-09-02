@@ -32,7 +32,7 @@ public struct IngredientInputFormCardView: BaseFeatureViewType {
     var plusButtonEnable: Bool { quantity >= 99 }
     var expirationDate: String {
       let formatter = DateFormatter()
-      formatter.dateFormat = "YYYY. MM. dd"
+      formatter.dateFormat = "YYYY / MM / dd"
       return formatter.string(from: ingredientStorage.expirationDate)
     }
     
@@ -222,14 +222,17 @@ private extension IngredientInputFormCardView {
     Button(action: {
       viewStore.send(.selectDate)
     }) {
-      Text("유통기한:   ")
-        .foregroundStyle(Color.asset(.gray500))
-      +
-      Text(viewStore.expirationDate)
-        .foregroundStyle(Color.asset(.gray800))
+      
+      HStack(spacing: 15) {
+        Text("유통기한:")
+          .foregroundStyle(Color.asset(.gray500))
+        Text(viewStore.expirationDate)
+          .foregroundStyle(Color.asset(.gray800))
+      }
     }
     .font(.asset(.body2))
     .padding(.horizontal, 10)
+    .padding(.vertical, 6)
     .frame(height: 32)
     .background(
       RoundedRectangle(cornerRadius: 6)

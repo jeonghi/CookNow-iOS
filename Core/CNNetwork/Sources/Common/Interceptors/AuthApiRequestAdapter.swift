@@ -7,17 +7,34 @@
 
 import Foundation
 import Alamofire
+import Auth
 
 final class AuthApiRequestAdapter: RequestInterceptor {
+  
+  private let tokenManager: TokenManager = .shared
   
   init() {
   }
   
   func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, any Error>) -> Void) {
     var urlRequest = urlRequest
-    
-    // TODO: 기본 Api 요청할 때 필요한 기능 추가 (예: API서버 인증 키 헤더에 추가 등..)
+
     urlRequest.addValue(HTTPHeader.json.rawValue, forHTTPHeaderField: HTTPHeader.contentType.rawValue)
+    
+//    if let languageCode = Locale.current.language.languageCode?.identifier {
+//      urlRequest.headers.add(
+//        name: HTTPHeader.acceptLanguage.rawValue,
+//        value: languageCode
+//      )
+//    }
+//    
+    
+    if let accessToken = tokenManager.getToken()?.accessToken {
+      urlRequest.headers.add(
+        name: HTTPHeader.authorization.rawValue,
+        value: "\(HTTPHeader.bearer.rawValue) \(accessToken)"
+      )
+    }
             
     completion(.success(urlRequest))
   }

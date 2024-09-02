@@ -12,7 +12,6 @@ import ProjectDescriptionHelpers
 let project = Project.makeLibrary(
   name: ModuleNameSpace.Auth.Auth.rawValue,
   dependencies: [
-    .Project.Commmon,
-    .Project.CNNetwork
+    .Project.Commmon
   ]
 )

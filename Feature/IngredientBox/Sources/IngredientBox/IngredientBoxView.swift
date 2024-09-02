@@ -27,6 +27,8 @@ public struct IngredientBoxView: BaseFeatureViewType {
     var categories: [IngredientCategory]
     var currCategoryIngredients: [Ingredient]
     var ingredientBox: [Ingredient]
+    var showingSheet: Bool
+    var showingNext: Bool
     
     public init(state: CoreState) {
       isLoading = state.isLoading
@@ -35,6 +37,8 @@ public struct IngredientBoxView: BaseFeatureViewType {
       categories = state.categories
       currCategoryIngredients = state.currCategoryIngredients
       ingredientBox = state.selectedingredientBox
+      showingSheet = state.showingSheet
+      showingNext = state.showingNext
     }
   }
   
@@ -68,6 +72,15 @@ extension IngredientBoxView {
     static let gridVerticalPadding: CGFloat = 20
     static let gridHorizontalPadding: CGFloat = 20
     static let itemInnerSpacing: CGFloat = 6
+    
+    static let bottomSheetScrollViewVerticalPadding: CGFloat = 15
+    static let bottomSheetScrollViewHorizontalPadding: CGFloat = 20
+    static let bottomSheetScrollViewHeight: CGFloat = 440
+    static let bottomSheetGridHorizontalSpacing: CGFloat = 5
+    static let bottomSheetGridVerticalPadding: CGFloat = 18
+    static let bottomSheetButtonHorizontalSpacing: CGFloat = 10
+    static let bottomSheetButtonHorizontalPadding: CGFloat = 20
+    static let bottomSheetButtonVerticalPadding: CGFloat = 8
   }
 }
 
@@ -83,7 +96,7 @@ extension IngredientBoxView: View {
             .scaledToFit()
           VStack(alignment: .leading, spacing: Metric.headerSpacing) {
             infoLabel()
-            CNSearchBar()
+            searchBar()
           } //: VStack
           .padding(.horizontal, Metric.horizontalPadding)
         } //: ZStask
@@ -98,11 +111,18 @@ extension IngredientBoxView: View {
     }
     .overlay(alignment: .bottom) {
       if viewStore.ingredientBox.count > 0 {
-        Button(action: {}) {
+        Button(action: {
+          viewStore.send(.ingredientBoxTapped)
+        }) {
           makeIngredientBox()
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
+      }
+    }
+    .navigationDestination(isPresented: viewStore.binding(get: \.showingNext, send: CoreAction.showingNext)) {
+      IfLetStore(inputFormStore) { store in
+        IngredientInputFormView(store)
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -112,6 +132,9 @@ extension IngredientBoxView: View {
     .cnLoading(viewStore.isLoading)
     .onLoad {
       viewStore.send(.onLoad)
+    }
+    .cnSheet(isPresented: viewStore.binding(get: \.showingSheet, send: CoreAction.showingSheet)) {
+      makeBottomSheet()
     }
   }
 }
@@ -162,7 +185,7 @@ extension IngredientBoxView {
         )
       }
     }.frame(height: Metric.segmentControlHeight)
-    .frame(maxWidth: .infinity)
+      .frame(maxWidth: .infinity)
   }
   
   @ViewBuilder
@@ -197,10 +220,13 @@ extension IngredientBoxView {
           .aspectRatio(1, contentMode: .fit)
           .padding(2)
           .background(Color.asset(.white))
+          .overlay {
+            Color.black.opacity(isContained ? 0.4 : 0.0)
+          }
           .clipShape(RoundedRectangle(cornerRadius: 12))
           .overlay(alignment: .bottomTrailing) {
             makeButton(for: isContained)
-              .offset(x: 4, y: 4)
+                .offset(x: 4, y: 4)
           }
       }
       
@@ -266,6 +292,72 @@ extension IngredientBoxView {
     .clipShape(RoundedRectangle(cornerRadius: 50))
   }
 }
+
+// MARK: 시트 뷰
+extension IngredientBoxView {
+  
+  private func makeBottomSheet() -> some View {
+    VStack(alignment: .leading) {
+      VStack(alignment: .leading, spacing: 10) {
+        Text("선택 재료 확인하기")
+          .font(.asset(.headline1))
+        Text("내가 선택한 재료들이 맞나요?")
+          .font(.asset(.caption))
+      } //: VStack
+      .foregroundStyle(Color.asset(.gray800))
+      
+      ScrollView(.vertical) {
+        makeBottomSheetGrid()
+          .padding(.horizontal, Metric.bottomSheetScrollViewHorizontalPadding)
+      }
+      .frame(height: Metric.bottomSheetScrollViewHeight)
+      .frame(maxWidth: .infinity)
+      .padding(.vertical, Metric.bottomSheetScrollViewVerticalPadding)
+      
+      HStack(spacing: Metric.bottomSheetButtonHorizontalSpacing) {
+        
+        Button(action: {
+          viewStore.send(.continueSelectionButtonTapped)
+        }) {
+          Text("계속 담기")
+        }.buttonStyle(StateButtonStyle.secondary(.default))
+        
+        Button(action: {
+          viewStore.send(.finishSelectionButtonTapped)
+        }) {
+          Text("재료 확인")
+        }
+        .buttonStyle(StateButtonStyle.primary(.default))
+      } //: HStack
+      .padding(.horizontal, Metric.bottomSheetButtonHorizontalPadding)
+      .padding(.vertical, Metric.bottomSheetButtonVerticalPadding)
+    }
+  }
+  
+  private func makeBottomSheetGrid() -> some View {
+    LazyVGrid(columns: [GridItem].init(repeating: .init(), count: 4)) {
+      ForEach(viewStore.ingredientBox, id: \.self) {
+        makeBottomSheetGridItem(for: $0)
+      }
+    }
+  }
+  
+  private func makeBottomSheetGridItem(for item: Ingredient) -> some View {
+    VStack(spacing: 5) {
+      CNAsyncImage(item.imageUrl)
+      Text(item.name)
+        .font(.asset(.bodyBold1))
+        .foregroundStyle(Color.asset(.gray800))
+    }
+  }
+}
+
+private extension IngredientBoxView {
+  var inputFormStore: Store<IngredientInputFormCore.State?, IngredientInputFormCore.Action> {
+    return store.scope(state: \.ingredientInputFormState, action: CoreAction.ingredientInputFormAction)
+  }
+}
+
 
 #Preview {
   NavigationView {

@@ -10,13 +10,13 @@ import Alamofire
 import Common
 
 /// 네트워크 통신 디버깅용
-final class AFLogger: EventMonitor {
+public final class AFLogger: EventMonitor {
   
-  static let shared = AFLogger()
+  public static let shared = AFLogger()
   
   private init() {}
   
-  func requestDidResume(_ request: Request) {
+  public func requestDidResume(_ request: Request) {
     
     let headersString = request.request?.headers.dictionary.jsonData?.toPrettyPrintedString ?? ""
     let bodyString = request.request?.httpBody?.toPrettyPrintedString ?? ""
@@ -29,7 +29,7 @@ final class AFLogger: EventMonitor {
     CNLog.i(message)
   }
   
-  func request<Value>(_ request: DataRequest, didParseResponse response: DataResponse<Value, AFError>) {
+  public func request<Value>(_ request: DataRequest, didParseResponse response: DataResponse<Value, AFError>) {
     
     
     let statusCode = (response.response?.statusCode ?? 0)

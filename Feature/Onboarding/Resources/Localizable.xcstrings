@@ -20,7 +20,6 @@
     },
     "signup_with_social" : {
       "comment" : "Localizable.strings\n  Onboading\n\n  Created by 쩡화니 on 7/2/24.",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

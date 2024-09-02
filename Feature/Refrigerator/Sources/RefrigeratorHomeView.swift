@@ -28,6 +28,11 @@ public struct RefrigeratorHomeView: BaseFeatureViewType {
     
     var categories: [IngredientCategory]
     var ingredients: [Ingredient]
+    var storageType: [IngredientStorage] = [
+      IngredientStorage.dummyData,
+      IngredientStorage.dummyData,
+      IngredientStorage.dummyData
+    ]
     
     public init(state: CoreState) {
       categories = state.categories

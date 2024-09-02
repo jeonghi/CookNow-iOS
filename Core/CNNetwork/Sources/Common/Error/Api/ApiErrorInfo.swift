@@ -10,7 +10,7 @@ import Foundation
 /// API 호출 시 발생하는 에러 정보입니다.
 /// ## SeeAlso
 /// - ``ApiFailureReason``
-struct ApiErrorInfo : Codable {
+public struct ApiErrorInfo : Codable {
   
   /// 에러 메시지
   let message: String

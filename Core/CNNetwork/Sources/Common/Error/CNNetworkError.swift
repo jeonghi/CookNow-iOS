@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CNNetworkError: Error {
+public enum CNNetworkError: Error {
   /// 클라이언트에서 발생하는 에러
   case ClientFailed(reason: ClientFailureReason, errorMessage: String?)
   /// API 서버에서 발생하는 에러
@@ -41,7 +41,7 @@ extension CNNetworkError {
 }
 
 extension CNNetworkError: LocalizedError {
-  var errorDescription: String? {
+  public var errorDescription: String? {
     switch self {
     case .ClientFailed(_, let errorMessage):
       var message = "Client Failure: \(errorMessage ?? "unknown error.")"
@@ -91,14 +91,14 @@ extension CNNetworkError {
 
 extension CNNetworkError {
   
-  var isApiFailed: Bool {
+  public var isApiFailed: Bool {
     if case .ApiFailed = self {
       return true
     }
     return false
   }
   
-  var isAuthFailed: Bool {
+  public var isAuthFailed: Bool {
     if case .AuthFailed = self {
       return true
     }
@@ -128,7 +128,7 @@ extension CNNetworkError {
   }
   
   /// 유효하지 않은 토큰 에러인지 체크합니다.
-  func isInvalidTokenError() -> Bool {
+  public func isInvalidTokenError() -> Bool {
     if case .ApiFailed = self, getApiError().reason == .Unauthorized {
       return true
     }
