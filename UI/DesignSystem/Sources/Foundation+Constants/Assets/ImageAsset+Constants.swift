@@ -31,13 +31,16 @@ public extension ImageAsset {
   
   // MARK: Refrigerator
   static let refrigerator = ImageAsset("refrigerator", in: .module, format: .image)
+  static let myfreigerIconStoragetypeCold = ImageAsset("myfreiger_icon_storagetype_cold", in: .module, format: .image)
+  static let myfreigerIconStoragetypeFreeze = ImageAsset("myfreiger_icon_storagetype_freeze", in: .module, format: .image)
+  static let myfreigerIconStoragetypeRoom = ImageAsset("myfreiger_icon_storagetype_room", in: .module, format: .image)
   
   // MARK: IngredientBox
   static let ingredientBoxHomeHeaderBackground = ImageAsset("ingredient_box_home_header", in: .module, format: .image)
   
   // MARK: InformationBox
-  static let sesac = ImageAsset("sesac", in: .module, format: .image)
-  static let questionBox = ImageAsset("questionBox", in: .module, format: .image)
-  static let bomb = ImageAsset("bomb", in: .module, format: .image)
-  static let bigEye = ImageAsset("bigEye", in: .module, format: .image)
+  static let infoBoxIconLeaf = ImageAsset("icon_infobox_leaf", in: .module, format: .image)
+  static let infoboxIconQuestionBox = ImageAsset("icon_infobox_questionBox", in: .module, format: .image)
+  static let infoBoxIconBomb = ImageAsset("icon_infobox_bomb", in: .module, format: .image)
+  static let infoBoxIconBigEye = ImageAsset("icon_infobox_bigEye", in: .module, format: .image)
 }

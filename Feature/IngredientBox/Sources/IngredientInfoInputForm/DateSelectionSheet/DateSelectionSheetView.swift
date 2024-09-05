@@ -28,7 +28,7 @@ public struct DateSelectionSheetView: BaseFeatureViewType {
   
   public init(
     _ store: StoreOf<Core> = .init(
-      initialState: Core.State(ingredientID: UUID(), selection: Date())
+      initialState: Core.State(ingredientID: UUID().uuidString, selection: Date())
     ){
       Core()
     }

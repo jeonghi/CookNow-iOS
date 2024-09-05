@@ -56,8 +56,8 @@ extension IngredientServiceImpl: IngredientServiceType {
   
   func saveMyIngredients(ingredientStorage: [IngredientStorage]) async throws {
     
-    let itemList: [SaveMyIngredientDTO.Request.Item] = ingredientStorage.map {
-      .init(ingredientId: $0.ingredient.id, quantity: $0.quantity, expirationDate: $0.expirationDate, storageType: .room)
+    let itemList: [UserIngredient] = ingredientStorage.map {
+      .init(ingredientId: $0.ingredient.id, quantity: $0.quantity, expirationDate: $0.expirationDate, storageType: .init($0.storageType))
     }
     
     let request: SaveMyIngredientDTO.Request = .init(itemList: itemList)
@@ -88,6 +88,32 @@ extension IngredientDTO.Response: Mappable {
         catergoryName: category.name,
         ingredients: ingredients
       )
+    }
+  }
+}
+
+extension CNNetwork.StorageType {
+  init(_ type: Domain.StorageType) {
+    switch type {
+    case .freezer:
+      self = .freeze
+    case .refrigerator:
+      self = .cold
+    case .roomTemperature:
+      self = .room
+    }
+  }
+}
+
+extension Domain.StorageType {
+  init(_ type: CNNetwork.StorageType) {
+    switch type {
+    case .freeze:
+      self = .freezer
+    case .cold:
+      self = .refrigerator
+    case .room:
+      self = .roomTemperature
     }
   }
 }

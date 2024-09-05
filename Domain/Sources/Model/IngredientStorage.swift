@@ -11,7 +11,7 @@ import Foundation
 /// - 어떤 식재료를, 몇개를, 어떻게 보관하고, 유통기한은 언제인지 대한 정보를 담은 구조체
 public struct IngredientStorage: Identifiable, Hashable, Equatable {
   
-  public var id: UUID
+  public var id: String
   
   /// 보관할 식재료
   public let ingredient: Ingredient
@@ -52,12 +52,13 @@ public struct IngredientStorage: Identifiable, Hashable, Equatable {
   
   // MARK: Initializer
   public init(
+    id: String? = nil,
     ingredient: Ingredient,
     storageType: StorageType = .refrigerator,
     quantity: Int = 1,
     expirationDate: Date? = Date()
   ) {
-    self.id = UUID()
+    self.id = id ?? UUID().uuidString
     self.ingredient = ingredient
     self.storageType = storageType
     self._quantity = quantity

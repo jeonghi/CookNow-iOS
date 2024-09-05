@@ -29,6 +29,9 @@ public struct IngredientBoxView: BaseFeatureViewType {
     var ingredientBox: [Ingredient]
     var showingSheet: Bool
     var showingNext: Bool
+    var ingredientBoxActive: Bool {
+      !ingredientBox.isEmpty
+    }
     
     public init(state: CoreState) {
       isLoading = state.isLoading
@@ -67,7 +70,7 @@ extension IngredientBoxView {
     static let searchBarPlaceholder: String = "재료를 입력하세요."
     static let infoLabelText: String = "내 냉장고에 있는 재료들을 선택하고\n정보를 입력해보세요!"
     
-    static let gridItemVerticalSpacing: CGFloat = 10
+    static let gridItemVerticalSpacing: CGFloat = 28
     static let gridItemHorizontalSpacing: CGFloat = 15
     static let gridVerticalPadding: CGFloat = 20
     static let gridHorizontalPadding: CGFloat = 20
@@ -106,11 +109,12 @@ extension IngredientBoxView: View {
       
       ScrollView(.vertical, showsIndicators: true) {
         ingredientGridView()
-          .padding(.vertical, 50)
+          .padding(.vertical, Metric.gridVerticalPadding)
+        makeIngredientBox().opacity(0)
       }
     }
-    .overlay(alignment: .bottom) {
-      if viewStore.ingredientBox.count > 0 {
+    .applyIf(viewStore.ingredientBoxActive) {
+     $0.overlay(alignment: .bottom) {
         Button(action: {
           viewStore.send(.ingredientBoxTapped)
         }) {
@@ -181,11 +185,14 @@ extension IngredientBoxView {
             get: { state in selectedCategory },
             send: CoreAction.selectCategory
           ),
-          label: { $0.catergoryName }
+          label: {
+            Text($0.catergoryName)
+          }
         )
+        .frame(height: Metric.segmentControlHeight)
       }
-    }.frame(height: Metric.segmentControlHeight)
-      .frame(maxWidth: .infinity)
+    }
+    .frame(maxWidth: .infinity)
   }
   
   @ViewBuilder
@@ -215,19 +222,20 @@ extension IngredientBoxView {
           viewStore.send(.putInIngredient(item))
         }
       }){
-        
-        CNAsyncImage(item.imageUrl)
-          .aspectRatio(1, contentMode: .fit)
-          .padding(2)
-          .background(Color.asset(.white))
-          .overlay {
-            Color.black.opacity(isContained ? 0.4 : 0.0)
-          }
-          .clipShape(RoundedRectangle(cornerRadius: 12))
-          .overlay(alignment: .bottomTrailing) {
-            makeButton(for: isContained)
-                .offset(x: 4, y: 4)
-          }
+        ZStack {
+          Color.asset(.white)
+          CNAsyncImage(item.imageUrl)
+            .aspectRatio(1, contentMode: .fit)
+            .padding(2)
+        }
+        .overlay {
+          Color.black.opacity(isContained ? 0.4 : 0.0)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(alignment: .bottomTrailing) {
+          makeButton(for: isContained)
+            .offset(x: 4, y: 4)
+        }
       }
       
       Text(item.name)
@@ -306,9 +314,9 @@ extension IngredientBoxView {
       } //: VStack
       .foregroundStyle(Color.asset(.gray800))
       
-      ScrollView(.vertical) {
+      ScrollView(.vertical, showsIndicators: false) {
         makeBottomSheetGrid()
-          .padding(.horizontal, Metric.bottomSheetScrollViewHorizontalPadding)
+//          .padding(.horizontal, Metric.bottomSheetScrollViewHorizontalPadding)
       }
       .frame(height: Metric.bottomSheetScrollViewHeight)
       .frame(maxWidth: .infinity)
@@ -329,7 +337,7 @@ extension IngredientBoxView {
         }
         .buttonStyle(StateButtonStyle.primary(.default))
       } //: HStack
-      .padding(.horizontal, Metric.bottomSheetButtonHorizontalPadding)
+//      .padding(.horizontal, Metric.bottomSheetButtonHorizontalPadding)
       .padding(.vertical, Metric.bottomSheetButtonVerticalPadding)
     }
   }

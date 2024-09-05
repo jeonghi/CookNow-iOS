@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "bomb.png",
+      "filename" : "myfreiger_icon_storagetype_cold.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "bomb@2x.png",
+      "filename" : "myfreiger_icon_storagetype_cold@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "bomb@3x.png",
+      "filename" : "myfreiger_icon_storagetype_cold@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

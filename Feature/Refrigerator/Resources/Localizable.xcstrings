@@ -1,7 +1,22 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld" : {
 
+    },
+    "Day%@" : {
+
+    },
+    "Day%@ %lld건" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Day%1$@ %2$lld건"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

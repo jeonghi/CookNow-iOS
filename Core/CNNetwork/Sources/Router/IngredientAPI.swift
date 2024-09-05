@@ -13,7 +13,8 @@ public enum IngredientAPI {
   case getAllIngedients
   case findIngredients(categoryId: String)
   case saveMyIngredients(SaveMyIngredientDTO.Request)
-  case getMyIngredients(StorageType)
+  case getMyIngredients
+  case updateMyIngredients(UpdateMyIngredientDTO.Request)
 }
 
 extension IngredientAPI: TargetType {
@@ -39,10 +40,8 @@ extension IngredientAPI: TargetType {
       return "/categories/ingredients"
     case .findIngredients(let categoryId):
       return "/category/\(categoryId)/ingredients"
-    case .saveMyIngredients:
+    case .saveMyIngredients, .getMyIngredients, .updateMyIngredients:
       return "/user/3/items"
-    case .getMyIngredients(let storageType):
-      return "/user/3/items?type=\(storageType.rawValue)"
     }
   }
   
@@ -64,6 +63,8 @@ extension IngredientAPI: TargetType {
   public var body: Data? {
     switch self {
     case .saveMyIngredients(let ingredients):
+      return try? JSONEncoder().encode(ingredients)
+    case .updateMyIngredients(let ingredients):
       return try? JSONEncoder().encode(ingredients)
     default:
       return nil

@@ -22,7 +22,7 @@ public struct DateSelectionSheetCore: Reducer {
   // MARK: State
   public struct State: Equatable, Identifiable {
     
-    public var id: UUID {
+    public var id: String {
       ingredientID
     }
     

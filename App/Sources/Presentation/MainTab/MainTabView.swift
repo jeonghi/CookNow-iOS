@@ -69,7 +69,6 @@ extension MainTabView: View {
               IngredientBoxView(ingredientBoxStore)
                 .navigationTitle(tabType.title)
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar(.hidden, for: .navigationBar)
             }
           case .Setting:
             NavigationWrapper {

@@ -21,7 +21,7 @@ public struct Ingredient: Identifiable, Equatable, Hashable {
   
   // MARK: Initializer
   public init(
-    id: String = UUID().uuidString,
+    id: String? = nil,
     name: String,
     imageUrl: String? = nil,
     category: IngredientCategory.ID? = nil,
@@ -31,13 +31,13 @@ public struct Ingredient: Identifiable, Equatable, Hashable {
   }
   
   public init(
-    id: String = UUID().uuidString,
+    id: String? = nil,
     name: String,
     imageUrl: URL? = nil,
     category: IngredientCategory.ID? = nil,
     estimatedExpirationDate: Date? = nil
   ) {
-    self.id = id
+    self.id = id ?? UUID().uuidString
     self.name = name
     self.imageUrl = imageUrl
     self.category = category

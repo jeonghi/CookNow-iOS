@@ -16,12 +16,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-
+    
     AppAppearance.configure()
     FirebaseApp.configure()
     sleep(1)
-
+    
     return true
+  }
+  
+  func application(
+    _ application: UIApplication,
+    supportedInterfaceOrientationsFor window: UIWindow?
+  ) -> UIInterfaceOrientationMask {
+    
+    // 세로방향 고정
+    return UIInterfaceOrientationMask.portrait
   }
 }
 

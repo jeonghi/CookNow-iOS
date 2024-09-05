@@ -141,7 +141,7 @@ public struct IngredientInputFormCore: Reducer {
         switch cardAction {
         case .copyIngredient:
           var copiedFormCardState = focusedformCardState
-          let newID: UUID = .init()
+          let newID: String = UUID().uuidString
           copiedFormCardState.id = newID
           state.formCardStateList.insert(copiedFormCardState, at: idx + 1)
           return .send(.scrollTo(newID))

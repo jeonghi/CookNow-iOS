@@ -26,7 +26,7 @@ enum AppAppearance {
     
     appearance.titleTextAttributes = titleTextAttributes
     appearance.backgroundColor = .asset(.white)
-    
+    appearance.configureWithTransparentBackground()
     // UINavigationBar.appearance()
     let navigationBarAppearance = UINavigationBar.appearance()
     navigationBarAppearance.standardAppearance = appearance

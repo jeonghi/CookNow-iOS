@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "sesac.png",
+      "filename" : "myfreiger_icon_storagetype_room.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "sesac@2x.png",
+      "filename" : "myfreiger_icon_storagetype_room@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "sesac@3x.png",
+      "filename" : "myfreiger_icon_storagetype_room@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
