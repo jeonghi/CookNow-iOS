@@ -82,7 +82,7 @@ extension IngredientInputFormCardView: View {
 
 // MARK: Components
 private extension IngredientInputFormCardView {
-  @ViewBuilder
+
   func copyIngredientButton() -> some View {
     Button(action: {
       viewStore.send(.copyIngredient)
@@ -94,7 +94,6 @@ private extension IngredientInputFormCardView {
     .tint(.asset(.gray800))
   }
   
-  @ViewBuilder
   func thumbnail() -> some View {
     ZStack {
       ingredientImage()
@@ -107,7 +106,6 @@ private extension IngredientInputFormCardView {
     }
   }
   
-  @ViewBuilder
   func ingredientImage() -> some View {
     CNAsyncImage(viewStore.imageUrl)
       .scaledToFit()
@@ -124,27 +122,25 @@ private extension IngredientInputFormCardView {
         .stroke(Color.asset(.gray200), lineWidth: 1.0))
   }
   
-  @ViewBuilder
   func ingredientNameLabel() -> some View {
     Text(viewStore.name)
       .font(.asset(.subhead3))
       .foregroundStyle(Color.asset(.gray800))
   }
   
-  @ViewBuilder
   func removeButton() -> some View {
     Button(action: {
       viewStore.send(.removeIngredient)
     }){
       Image(systemName: "minus")
         .foregroundStyle(Color.asset(.white))
-        .padding()
+        .padding(3)
+        .frame(width: 24, height: 24)
         .aspectRatio(1, contentMode: .fit)
         .clipShape(Circle())
         .background(Circle().fill(Color.asset(.danger500)))
         .overlay(Circle().stroke(Color.asset(.gray200), lineWidth: 1.0))
     }
-    .frame(width: 24, height: 24)
   }
   
   @ViewBuilder
@@ -184,7 +180,6 @@ private extension IngredientInputFormCardView {
     )
   }
   
-  @ViewBuilder
   func plusButton() -> some View {
     Button(action: {
       viewStore.send(.plusIngredientAmount)
@@ -195,7 +190,6 @@ private extension IngredientInputFormCardView {
       .disabled(viewStore.plusButtonEnable)
   }
   
-  @ViewBuilder
   func minusButton() -> some View {
     Button(action: {
       viewStore.send(.minusIngredientAmount)

@@ -68,9 +68,11 @@ public struct DateSelectionSheetCore: Reducer {
         
         // MARK: View defined Action
       case .cancelButtonTapped:
+        
         return .send(.cancel)
       case .confirmButtonTapped:
         return .send(.confirm(state.id, state.selectedDate))
+        
       case .cancel:
         return .none
       case .confirm:
