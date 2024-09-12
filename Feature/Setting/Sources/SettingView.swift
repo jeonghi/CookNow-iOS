@@ -114,6 +114,7 @@ extension SettingView: View {
     .scrollContentBackground(.hidden)
     .listStyle(.insetGrouped)
     .foregroundStyle(Color.asset(.gray800))
+    .font(.asset(.body3))
     .kerning(-0.6)
     .alert(
       isPresented: viewStore.binding(
