@@ -8,6 +8,7 @@
 import SwiftUI
 import PopupView
 import DesignSystemFoundation
+import Common
 
 public extension View {
   func cnSheet<PopupContent: View>(
@@ -25,6 +26,7 @@ public extension View {
         }
         .frame(maxWidth: .infinity)
         .background(Color.asset(.white))
+        .cornerRadius(8, corners: [.topLeft, .topRight])
       } customize: {
         $0
           .isOpaque(true)
@@ -55,6 +57,7 @@ public extension View {
         }
         .frame(maxWidth: .infinity)
         .background(Color.asset(.white))
+        .cornerRadius(8, corners: [.topLeft, .topRight])
       } customize: {
         $0
           .isOpaque(true)
