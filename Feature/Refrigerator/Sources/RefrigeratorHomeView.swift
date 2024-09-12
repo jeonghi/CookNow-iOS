@@ -109,10 +109,10 @@ extension RefrigeratorHomeView {
   private func topBarView() -> some View {
     VStack(spacing: 15) {
       
-      if(isIconVisible) {
+//      if(isIconVisible) {
         infoBoxView()
           .padding(.horizontal, 20)
-      }
+//      }
       
       if case .expiredSoon(_, _) = viewStore.currStatus {
         expireSoonIngredientsScrollView()
