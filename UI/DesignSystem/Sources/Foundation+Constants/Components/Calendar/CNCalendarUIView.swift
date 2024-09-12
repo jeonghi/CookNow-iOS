@@ -24,6 +24,8 @@ final class CNCalendarUIView: UIView {
     $0.delegate = self
   }
   
+  weak var delegate: CNCalendarUIViewDelegate?
+  
   let headerDateFormatter = DateFormatter().then {
     $0.dateFormat = "M월 YYYY"
     $0.locale = Locale(identifier: "ko_kr")
@@ -98,6 +100,10 @@ final class CNCalendarUIView: UIView {
     
   func getPreviousMonth(date: Date) -> Date {
     return Calendar.current.date(byAdding: .month, value: -1, to: date)!
+  }
+  
+  func selectDate(date: Date) {
+    calendarView.select(date, scrollToDate: true)
   }
 }
 
@@ -196,6 +202,10 @@ extension CNCalendarUIView: FSCalendarDelegate, FSCalendarDataSource, FSCalendar
     return true
   }
   
+  func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+    delegate?.calendar(self, selectedDate: date)
+  }
+  
   // MARK: FSCalendarDelegateAppearance
   func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
 //      let month = calendar.currentPage
@@ -204,6 +214,10 @@ extension CNCalendarUIView: FSCalendarDelegate, FSCalendarDataSource, FSCalendar
 //      }
       return nil
   }
+}
+
+protocol CNCalendarUIViewDelegate: AnyObject {
+  func calendar(_ calendar: CNCalendarUIView, selectedDate date: Date)
 }
 
 #Preview {

@@ -22,23 +22,29 @@ public struct CNCalendarView: UIViewControllerRepresentable {
   public typealias UIViewControllerType = CNCalendarUIViewController
   
   public func makeUIViewController(context: Context) -> CNCalendarUIViewController {
-    return .init()
+    let vc = CNCalendarUIViewController()
+    vc.selectDate(date: selectedDate)
+    return vc
   }
   
   public func updateUIViewController(_ uiViewController: CNCalendarUIViewController, context: Context) {
-    
+    uiViewController.delegate = context.coordinator
   }
   
   public func makeCoordinator() -> Coordinator {
     return Coordinator(self)
   }
   
-  public class Coordinator: NSObject {
+  public class Coordinator: NSObject, CNCalendarUIViewDelegate {
     
     private var _parent: CNCalendarView
     
     init(_ parent: CNCalendarView) {
       _parent = parent
+    }
+    
+    func calendar(_ calendar: CNCalendarUIView, selectedDate date: Date) {
+      _parent.selectedDate = date
     }
   }
 }

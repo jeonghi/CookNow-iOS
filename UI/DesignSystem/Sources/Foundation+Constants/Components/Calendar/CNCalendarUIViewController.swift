@@ -12,6 +12,11 @@ import DesignSystemFoundation
 public final class CNCalendarUIViewController: UIViewController {
   
   private var calendarView: CNCalendarUIView = .init()
+  weak var delegate: CNCalendarUIViewDelegate? {
+    didSet {
+      calendarView.delegate = delegate
+    }
+  }
   
   // MARK: Life cycle
   
@@ -25,6 +30,10 @@ public final class CNCalendarUIViewController: UIViewController {
   
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
+  }
+  
+  func selectDate(date: Date) {
+    calendarView.selectDate(date: date)
   }
 }
 
