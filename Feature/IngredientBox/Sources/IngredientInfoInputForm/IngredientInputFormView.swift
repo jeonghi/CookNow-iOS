@@ -26,6 +26,7 @@ public struct IngredientInputFormView: BaseFeatureViewType {
   
   public struct ViewState: Equatable {
     var formCardStateList: IdentifiedArrayOf<FormCard.State>
+    var storageTypeSelectionSheetState: StorageTypeSelectionSheetCore.State?
     var dateSelectionSheetState: DateSelectionSheetCore.State?
     var scrolledIngredientStorageId: IngredientStorage.ID?
     var isLoading: Bool
@@ -35,6 +36,7 @@ public struct IngredientInputFormView: BaseFeatureViewType {
     public init(state: CoreState) {
       formCardStateList = state.formCardStateList
       dateSelectionSheetState = state.dateSelectionSheetState
+      storageTypeSelectionSheetState = state.storageTypeSelectionSheetState
       scrolledIngredientStorageId = state.scrolledIngredientStorageId
       isLoading = state.isLoading
       isDismiss = state.isDismiss
@@ -81,7 +83,7 @@ extension IngredientInputFormView: View {
     return VStack {
       VStack(spacing: Metric.infoLabelAndAdBannerSpacing) {
         introductionSection()
-        adSection()
+//        adSection()
       }
       .padding(.horizontal, Metric.contentHorizontalPadding)
       .padding(.top, 10)
@@ -111,20 +113,23 @@ extension IngredientInputFormView: View {
         .padding(.horizontal, Metric.contentHorizontalPadding)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .cnSheet(
-      item: viewStore.binding(
-        get: \.dateSelectionSheetState,
-        send: CoreAction.updateDateSelectionSheetState
-      )
-    ) { _ in
+    .cnSheet(item: viewStore.binding(
+      get: \.dateSelectionSheetState,
+      send: CoreAction.updateDateSelectionSheetState
+    )) { _ in
       IfLetStore(
-        store.scope(
-          state: \.dateSelectionSheetState,
-          action: CoreAction.dateSelectionSheetAction
-        )
-      ) { store in
-        DateSelectionSheetView(store)
-      }
+        dateSelectionSheetStore,
+        then: DateSelectionSheetView.init
+      )
+    }
+    .cnSheet(item: viewStore.binding(
+        get: \.storageTypeSelectionSheetState,
+        send: CoreAction.updateStorageTypeSelectionSheetState
+    )) { _ in
+      IfLetStore(
+        storagetypeSelectionSheetStore,
+        then: StorageTypeSelectionSheetView.init
+      )
     }
     .kerning(-0.6)
     .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding, safeAreaPadding: Metric.doneButtonBottomPadding)
@@ -210,7 +215,7 @@ private extension IngredientInputFormView {
   
   @ViewBuilder
   func introductionLabel() -> some View {
-    Text("현재 적용되어있는 유통기한은 블라블라(?) 내 냉장고에 있는 재료들을\n선택하고 정보를 입력해보세요!(?>?_)")
+    Text("내 냉장고에 있는 재료들을 선택하고 정보를 입력해보세요!")
       .multilineTextAlignment(.leading)
       .lineLimit(2)
       .font(.asset(.caption))
@@ -289,6 +294,16 @@ private extension IngredientInputFormView {
         }.buttonStyle(StateButtonStyle.primary(.default))
       }
     }
+  }
+}
+
+private extension IngredientInputFormView {
+  var dateSelectionSheetStore: Store<DateSelectionSheetCore.State?, DateSelectionSheetCore.Action> {
+    return store.scope(state: \.dateSelectionSheetState, action: CoreAction.dateSelectionSheetAction)
+  }
+  
+  var storagetypeSelectionSheetStore: Store<StorageTypeSelectionSheetCore.State?, StorageTypeSelectionSheetCore.Action> {
+    return store.scope(state: \.storageTypeSelectionSheetState, action: CoreAction.storageSelctionSheetAction)
   }
 }
 
