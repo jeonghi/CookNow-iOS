@@ -9,6 +9,7 @@ import Foundation
 import ComposableArchitecture
 import Dependencies
 import Auth
+import DesignSystem
 
 public struct SettingCore: Reducer {
   
@@ -21,17 +22,12 @@ public struct SettingCore: Reducer {
   // MARK: State
   public struct State: Equatable {
     var isLoading: Bool
-    var showingLogoutAlert: Bool
-    var showingWithdrawlAlert: Bool
+    var alertState: CNAlertState?
     
     public init(
-      isLoading: Bool = false,
-      showingLogoutAlert: Bool = false,
-      showingWithdrawlAlert: Bool = false
+      isLoading: Bool = false
     ) {
       self.isLoading = isLoading
-      self.showingLogoutAlert = showingLogoutAlert
-      self.showingWithdrawlAlert = showingWithdrawlAlert
     }
   }
   
@@ -46,17 +42,17 @@ public struct SettingCore: Reducer {
     // MARK: View defined Action
     case logoutButtonTapped
     case withdrawlButtonTapped
-    case logoutConfirmed
-    case withdrawlConfirmed
-    case dismissLogoutAlert
-    case dismissWithdrawlAlert
+    case cancelAlert
+    case updateAlertState(CNAlertState?)
     
     // MARK: Networking
   }
   
   // MARK: Reduce
   public var body: some ReducerOf<Self> {
-    Reduce { state, action in
+    Reduce {
+      state,
+      action in
       switch action {
         // MARK: Life Cycle
       case .onAppear:
@@ -71,29 +67,17 @@ public struct SettingCore: Reducer {
         
         // MARK: View defined Action
       case .logoutButtonTapped:
-        state.showingLogoutAlert = true
         return .none
         
       case .withdrawlButtonTapped:
-        state.showingWithdrawlAlert = true
         return .none
         
-      case .logoutConfirmed:
-        state.showingLogoutAlert = false
-        tokenManager.deleteToken()
+      case .cancelAlert:
+        state.alertState = nil
         return .none
         
-      case .withdrawlConfirmed:
-        state.showingWithdrawlAlert = false
-        print("User account withdrawn")
-        return .none
-        
-      case .dismissLogoutAlert:
-        state.showingLogoutAlert = false
-        return .none
-        
-      case .dismissWithdrawlAlert:
-        state.showingWithdrawlAlert = false
+      case .updateAlertState(let updated):
+        state.alertState = updated
         return .none
         
         // MARK: Networking

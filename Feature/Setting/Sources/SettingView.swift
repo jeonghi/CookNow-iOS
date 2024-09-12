@@ -21,12 +21,10 @@ public struct SettingView: BaseFeatureViewType {
   
   public struct ViewState: Equatable {
     var isLoading: Bool
-    var showingLogoutAlert: Bool
-    var showingWithdrawlAlert: Bool
+    var alertState: CNAlertState?
     public init(state: CoreState) {
       isLoading = state.isLoading
-      showingLogoutAlert = state.showingLogoutAlert
-      showingWithdrawlAlert = state.showingWithdrawlAlert
+      alertState = state.alertState
     }
   }
   
@@ -63,50 +61,14 @@ extension SettingView: View {
       // App Info Section
       Section {
         ForEach(AppInfoSectionType.allCases, id: \.self) { section in
-          switch section {
-          case .versionInfo:
-            HStack {
-              Text("앱 버전 정보")
-              Spacer()
-              Text("1.0.0")
-            }
-            
-          case .qna:
-            Button(action: {
-              openInSafari(urlString: "https://notion.so/qna")
-            }) {
-              Text("문의하기")
-            }
-            
-          case .announcement:
-            Button(action: {
-              openInSafari(urlString: "https://notion.so/announcements")
-            }) {
-              Text("공지사항")
-            }
-          }
+          makeAppInfoSectionList(section)
         }
       }
       
       // User Auth Section
       Section {
         ForEach(UserAuthSectionType.allCases, id: \.self) { section in
-          switch section {
-          case .logout:
-            Button(action: {
-              viewStore.send(.logoutButtonTapped)
-            }) {
-              Text("로그아웃")
-            }
-            
-          case .withdrawl:
-            Button(action: {
-              viewStore.send(.withdrawlButtonTapped)
-            }) {
-              Text("회원탈퇴")
-                .foregroundStyle(Color.asset(.danger500))
-            }
-          }
+          makeUserAuthSectionList(section)
         }
       }
     }
@@ -116,36 +78,12 @@ extension SettingView: View {
     .foregroundStyle(Color.asset(.gray800))
     .font(.asset(.body3))
     .kerning(-0.6)
-    .alert(
-      isPresented: viewStore.binding(
-        get: { $0.showingLogoutAlert },
-        send: .dismissLogoutAlert
+    .cnAlert(
+      viewStore.binding(
+        get: \.alertState,
+        send: CoreAction.updateAlertState
       )
-    ) {
-      Alert(
-        title: Text("로그아웃"),
-        message: Text("정말 로그아웃하시겠습니까?"),
-        primaryButton: .destructive(Text("로그아웃"), action: {
-          viewStore.send(.logoutConfirmed)
-        }),
-        secondaryButton: .cancel(Text("취소"))
-      )
-    }
-//    .alert(
-//      isPresented: viewStore.binding(
-//        get: { $0.showingWithdrawlAlert },
-//        send: .dismissWithdrawlAlert
-//      )
-//    ) {
-//      Alert(
-//        title: Text("회원탈퇴"),
-//        message: Text("정말 회원탈퇴를 진행하시겠습니까?"),
-//        primaryButton: .destructive(Text("탈퇴"), action: {
-//          viewStore.send(.withdrawlConfirmed)
-//        }),
-//        secondaryButton: .cancel(Text("취소"))
-//      )
-//    }
+    )
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.asset(.bgMain))
   }
@@ -153,10 +91,65 @@ extension SettingView: View {
 
 // MARK: Componet
 extension SettingView {
+  
   // MARK: Functions
   private func openInSafari(urlString: String) {
     if let url = URL(string: urlString) {
       UIApplication.shared.open(url)
+    }
+  }
+  
+  @ViewBuilder
+  private func makeAppInfoSectionList(_ type: AppInfoSectionType) -> some View {
+    switch type {
+    case .versionInfo:
+      HStack {
+        Text("앱 버전 정보")
+        Spacer()
+        Text("1.0.0")
+      }
+      
+    case .qna:
+      NavigationLink(destination: CNWebView(Constants.csWebUrl)) {
+        Text("고객센터")
+      }
+      
+    case .announcement:
+      NavigationLink(destination: CNWebView(Constants.tosWebUrl)) {
+        Text("약관 및 정책")
+      }
+    }
+  }
+  
+  @ViewBuilder
+  private func makeUserAuthSectionList(_ type: UserAuthSectionType) -> some View {
+    switch type {
+    case .logout:
+      Button(action: {
+        let alertState: CNAlertState = .init(
+          title: "로그아웃하시겠습니까?",
+          description: "로그아웃시 로그인화면으로 돌아갑니다",
+          primaryButton: .init(label: "확인", action: {viewStore.send(.logoutButtonTapped)}),
+          secondaryButton: .init(label: "취소", action: {viewStore.send(.cancelAlert)})
+        )
+        viewStore.send(.updateAlertState(alertState))
+      }) {
+        Text("로그아웃")
+      }
+      
+    case .withdrawl:
+      Button(action: {
+        let alertState: CNAlertState = .init(
+          title: "회원탈퇴하시겠습니까?",
+          description: "탈퇴시 모든 정보가 초기화됩니다",
+          primaryButton: .init(label: "탈퇴", action: {viewStore.send(.withdrawlButtonTapped)}),
+          secondaryButton: .init(label: "취소", action: {viewStore.send(.cancelAlert)})
+        )
+        viewStore.send(.updateAlertState(alertState))
+      }) {
+        Text("회원탈퇴")
+          .foregroundStyle(Color.asset(.danger500))
+      }
     }
   }
 }
