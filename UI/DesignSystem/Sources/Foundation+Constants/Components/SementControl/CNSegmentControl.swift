@@ -18,6 +18,7 @@ public struct CNSegmentControl<T>: View where T: Hashable {
   private var scrollable: Bool
   private var selectedTint: ColorAsset
   private var unselectedTint: ColorAsset
+  @State private var scrollProxy: ScrollViewProxy?
   
   public init(
     segments: [T],
@@ -38,8 +39,13 @@ public struct CNSegmentControl<T>: View where T: Hashable {
   public var body: some View {
     Group {
       if scrollable {
-        ScrollView(.horizontal, showsIndicators: false) {
-          contentView()
+        ScrollViewReader { proxy in
+          ScrollView(.horizontal, showsIndicators: false) {
+            contentView()
+          }
+          .onAppear(perform: {
+            self.scrollProxy = proxy
+          })
         }
       } else {
         contentView()
@@ -58,6 +64,9 @@ extension CNSegmentControl {
       ForEach(self.segments, id: \.self) { segment in
         Button(action: {
           self.selected = segment
+          withAnimation(.default) {
+            scrollProxy?.scrollTo(segment)
+          }
         }) {
           ZStack {
             Color.clear
@@ -85,6 +94,7 @@ extension CNSegmentControl {
             $0.tint(Color.asset(.primary700))
           }
         }
+        .id(segment)
       }
     }
   }
