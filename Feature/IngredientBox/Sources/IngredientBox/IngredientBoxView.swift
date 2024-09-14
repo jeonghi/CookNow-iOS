@@ -168,9 +168,9 @@ extension IngredientBoxView: View {
     .navigationDestination(item: viewStore.binding(get: \.route, send: CoreAction.setRoute)) { route in
       switch route {
       case .inputForm:
-        IfLetStore(inputFormStore) { store in
+        LazyNavigationView(IfLetStore(inputFormStore) { store in
           IngredientInputFormView(store)
-        }
+        })
       }
     }
   }
