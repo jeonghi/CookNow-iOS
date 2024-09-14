@@ -13,6 +13,7 @@ import Domain
 
 protocol IngredientServiceType {
   func getMyIngredients() async throws -> [IngredientStorage]
+  func deleteMyIngredients(_ ids: [IngredientStorage.ID]) async throws -> [IngredientStorage.ID]
 }
 
 struct IngredientServiceDependencyKey: DependencyKey {
@@ -31,6 +32,11 @@ extension DependencyValues {
 }
 
 final class IngredientServiceMock: IngredientServiceType {
+  
+  func deleteMyIngredients(_ ids: [Domain.IngredientStorage.ID]) async throws -> [Domain.IngredientStorage.ID] {
+    return []
+  }
+  
   func getMyIngredients() async throws -> [IngredientStorage] {
     return [.dummyData]
   }
@@ -50,6 +56,12 @@ final class IngredientServiceImpl: IngredientServiceType {
     let myIngredientsResponse = try await network.responseData(.getMyIngredients, GetMyIngredientDTO.Response.self)
     
     return myIngredientsResponse.itemList.map { $0.toModel() }
+  }
+  
+  func deleteMyIngredients(_ ids: [IngredientStorage.ID]) async throws -> [Domain.IngredientStorage.ID] {
+    let request: DeleteMyIngredientDTO.Request = .init(ids: ids.compactMap{Int($0)})
+    let response = try await network.responseData(.deleteMyIngredients(request), DeleteMyIngredientDTO.Response.self)
+    return response.ids.compactMap { String($0) }
   }
   
   func updateMyIngredients(for models: [IngredientStorage]) async throws ->  [IngredientStorage]  {
