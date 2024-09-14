@@ -25,6 +25,7 @@ public struct IngredientInputFormView: BaseFeatureViewType {
   @Environment(\.dismiss) private var dismiss
   
   public struct ViewState: Equatable {
+    
     var formCardStateList: IdentifiedArrayOf<FormCard.State>
     var storageTypeSelectionSheetState: StorageTypeSelectionSheetCore.State?
     var dateSelectionSheetState: DateSelectionSheetCore.State?
@@ -33,6 +34,7 @@ public struct IngredientInputFormView: BaseFeatureViewType {
     var doneButtonEnable: Bool { formCardStateList.count > 0 && !isLoading }
     var isIngredientEmpty: Bool { formCardStateList.count <= 0 }
     var isDismiss: Bool
+    
     public init(state: CoreState) {
       formCardStateList = state.formCardStateList
       dateSelectionSheetState = state.dateSelectionSheetState
@@ -134,6 +136,12 @@ extension IngredientInputFormView: View {
     .kerning(-0.6)
     .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding, safeAreaPadding: Metric.doneButtonBottomPadding)
     .cnLoading(viewStore.isLoading)
+    .onAppear {
+      viewStore.send(.onAppear)
+    }
+    .onDisappear {
+      viewStore.send(.onDisappear)
+    }
   }
 }
 

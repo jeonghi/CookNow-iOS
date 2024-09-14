@@ -54,11 +54,13 @@ public struct IngredientInputFormCore: Reducer {
     case addIngredientButtonTapped
     case doneButtonTapped
     case requestSaveMyIngredients
+    case removeAllIngredients
     case formCardAction(id: IngredientStorage.ID, action: FormCard.Action)
     case dateSelectionSheetAction(action: DateSelectionSheetCore.Action)
     case storageSelctionSheetAction(action: StorageTypeSelectionSheetCore.Action)
     case updateDateSelectionSheetState(DateSelectionSheetCore.State?)
     case updateStorageTypeSelectionSheetState(StorageTypeSelectionSheetCore.State?)
+    case ingredientStoragesUpdated
   }
   
   // MARK: Reduce
@@ -110,6 +112,13 @@ public struct IngredientInputFormCore: Reducer {
         
       case .requestSaveMyIngredients:
         return requestSaveMyIngredients(&state)
+        
+      case .removeAllIngredients:
+        state.formCardStateList.removeAll()
+        return .send(.ingredientStoragesUpdated)
+        
+      case .ingredientStoragesUpdated:
+        return .none
       }
     }
     .forEach(\.formCardStateList, action: /Action.formCardAction(id:action:)) {
@@ -146,7 +155,9 @@ extension IngredientInputFormCore {
     }
     
     state.formCardStateList.updateOrAppend(targetState)
-    return .none
+    return .run { send in
+      await send(.ingredientStoragesUpdated)
+    }
   }
   
   private func handleFormCardAction(
@@ -182,7 +193,7 @@ extension IngredientInputFormCore {
       
     case .removeIngredient:
       state.formCardStateList.remove(id: id)
-      return .none
+      return .send(.ingredientStoragesUpdated)
       
     default:
       return .none
@@ -229,6 +240,7 @@ extension IngredientInputFormCore {
       do {
         try await ingredientService.saveMyIngredients(ingredientStorage: ingredientStorageList)
         await send(.isLoading(false))
+        await send(.removeAllIngredients)
         await send(.dismiss)
       } catch {
         await send(.isLoading(false))
