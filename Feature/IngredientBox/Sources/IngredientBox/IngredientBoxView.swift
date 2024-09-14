@@ -164,6 +164,7 @@ extension IngredientBoxView: View {
     }
     .toolbar(isSearchMode ? .hidden : .visible, for: .navigationBar)
     .toolbar(isSearchMode ? .hidden : .visible, for: .tabBar)
+    .ignoresSafeArea(.keyboard)
     .navigationDestination(item: viewStore.binding(get: \.route, send: CoreAction.setRoute)) { route in
       switch route {
       case .inputForm:
