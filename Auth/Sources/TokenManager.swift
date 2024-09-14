@@ -9,9 +9,9 @@ import Foundation
 import Common
 
 public protocol TokenManagerType {
-  func setToken(_ token: JWTToken?) -> JWTToken?
   func getToken() -> JWTToken?
-  func deleteToken()
+  @MainActor func setToken(_ token: JWTToken?) -> JWTToken?
+  @MainActor func deleteToken()
 }
 
 public final class TokenManager: TokenManagerType, ObservableObject {
@@ -26,6 +26,7 @@ public final class TokenManager: TokenManagerType, ObservableObject {
     _ = getToken()
   }
   
+  @MainActor
   @discardableResult
   public func setToken(_ token: JWTToken?) -> JWTToken? {
     Properties.saveCodable(key: AuthTokenKey, data: token)
@@ -41,6 +42,7 @@ public final class TokenManager: TokenManagerType, ObservableObject {
     return self.token
   }
   
+  @MainActor
   public func deleteToken() {
     Properties.delete(AuthTokenKey)
     self.token = nil
