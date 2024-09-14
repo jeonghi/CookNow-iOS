@@ -11,18 +11,11 @@ import Common
 
 struct CNWebView: View {
   
-  @State private var url: URL?
-  
-  init(_ url: URL? = nil) {
-    self.url = url
-  }
-  
-  init(_ urlString: String? = nil) {
-    self.url = urlString?.asUrl()
-  }
+  @State var url: URL?
   
   var body: some View {
     CNWebViewRepresentable(url: $url)
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
 
@@ -30,17 +23,15 @@ struct CNWebViewRepresentable: UIViewRepresentable {
   
   @Binding var url: URL?
   
-  func makeUIView(context: Context) -> some UIView {
+  func makeUIView(context: Context) -> WKWebView {
     let view = WKWebView()
-    
-    guard let url else { return view }
-    
-    let urlRequest = URLRequest(url: url)
-    view.load(urlRequest)
-    
     return view
   }
   
-  func updateUIView(_ uiView: UIViewType, context: Context) {
+  func updateUIView(_ view: WKWebView, context: Context) {
+    guard let url else { return }
+    
+    let urlRequest = URLRequest(url: url)
+    view.load(urlRequest)
   }
 }
