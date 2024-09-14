@@ -51,6 +51,8 @@ final class AuthApiRequestRetrier: RequestInterceptor {
           }
           
           guard let refreshToken = tokenManager.getToken()?.refreshToken else {
+            /// 토큰 Expire 알림
+            NotificationCenter.default.post(name: .tokenExpired, object: nil)
             return
           }
           
