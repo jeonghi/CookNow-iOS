@@ -258,8 +258,9 @@ extension IngredientBoxCore {
   }
   
   private func handleInputForm(_ state: inout State, _ action: IngredientInputFormCore.Action) -> Effect<Action> {
+    
     switch action {
-    case .ingredientStoragesUpdated:
+    case .ingredientInputFormCardListAction(.ingredientStoragesUpdated):
       guard let ingredients = state.ingredientInputFormState?.ingredientStorageList else {
         return .none
       }
@@ -268,6 +269,10 @@ extension IngredientBoxCore {
         .map { $0.ingredient.id }
       
       state.selectedingredientBox = Set(selectedIds)
+      return .none
+      
+    case .requestSaveMyIngredientsSuccess:
+      state.selectedingredientBox.removeAll()
       return .none
     default:
       return .none

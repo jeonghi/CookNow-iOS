@@ -21,25 +21,22 @@ public struct IngredientInputFormView: BaseFeatureViewType {
   public let store: StoreOf<Core>
   
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
-  @State private var scrollProxy: ScrollViewProxy?
+  
   @Environment(\.dismiss) private var dismiss
   
   public struct ViewState: Equatable {
     
-    var formCardStateList: IdentifiedArrayOf<FormCard.State>
-    var storageTypeSelectionSheetState: StorageTypeSelectionSheetCore.State?
-    var dateSelectionSheetState: DateSelectionSheetCore.State?
-    var scrolledIngredientStorageId: IngredientStorage.ID?
+    var ingredientStorageList: [IngredientStorage]
     var isLoading: Bool
-    var doneButtonEnable: Bool { formCardStateList.count > 0 && !isLoading }
-    var isIngredientEmpty: Bool { formCardStateList.count <= 0 }
     var isDismiss: Bool
     
+    // MARK: 계산 프로퍼티
+    var doneButtonEnable: Bool { ingredientStorageList.count > 0 && !isLoading }
+    var isIngredientEmpty: Bool { ingredientStorageList.count <= 0 }
+    
+    
     public init(state: CoreState) {
-      formCardStateList = state.formCardStateList
-      dateSelectionSheetState = state.dateSelectionSheetState
-      storageTypeSelectionSheetState = state.storageTypeSelectionSheetState
-      scrolledIngredientStorageId = state.scrolledIngredientStorageId
+      ingredientStorageList = state.ingredientStorageList
       isLoading = state.isLoading
       isDismiss = state.isDismiss
     }
@@ -115,24 +112,6 @@ extension IngredientInputFormView: View {
         .padding(.horizontal, Metric.contentHorizontalPadding)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .cnSheet(item: viewStore.binding(
-      get: \.dateSelectionSheetState,
-      send: CoreAction.updateDateSelectionSheetState
-    )) { _ in
-      IfLetStore(
-        dateSelectionSheetStore,
-        then: DateSelectionSheetView.init
-      )
-    }
-    .cnSheet(item: viewStore.binding(
-        get: \.storageTypeSelectionSheetState,
-        send: CoreAction.updateStorageTypeSelectionSheetState
-    )) { _ in
-      IfLetStore(
-        storagetypeSelectionSheetStore,
-        then: StorageTypeSelectionSheetView.init
-      )
-    }
     .kerning(-0.6)
     .safeAreaBottomPadding(defaultPadding: Metric.doneButtonBottomPadding, safeAreaPadding: Metric.doneButtonBottomPadding)
     .cnLoading(viewStore.isLoading)
@@ -163,33 +142,7 @@ private extension IngredientInputFormView {
   
   @ViewBuilder
   func ingredientStorageFormListSection() -> some View {
-    ScrollViewReader { proxy in
-      LazyVStack(spacing: 20) {
-        ForEachStore(
-          store.scope(
-            state: \.formCardStateList,
-            action: CoreAction.formCardAction
-          )
-        ) {
-          IngredientInputFormCardView.init($0)
-            .id($0.id)
-        }
-        .onDelete { indexSet in
-          for index in indexSet {
-            let id = viewStore.formCardStateList[index].id
-            viewStore.send(.formCardAction(id: id, action: .removeIngredient))
-          }
-        }
-        .onAppear {
-          self.scrollProxy = proxy
-        }
-        .onChange(of: viewStore.scrolledIngredientStorageId) { _, newValue in
-          withAnimation {
-            scrollProxy?.scrollTo(newValue)
-          }
-        }
-      } // LazyVStack
-    } // ScrollViewReader
+    IngredientInputFormCardListView(ingredientInputFormCardListStore)
   }
   
   @ViewBuilder
@@ -306,12 +259,9 @@ private extension IngredientInputFormView {
 }
 
 private extension IngredientInputFormView {
-  var dateSelectionSheetStore: Store<DateSelectionSheetCore.State?, DateSelectionSheetCore.Action> {
-    return store.scope(state: \.dateSelectionSheetState, action: CoreAction.dateSelectionSheetAction)
-  }
   
-  var storagetypeSelectionSheetStore: Store<StorageTypeSelectionSheetCore.State?, StorageTypeSelectionSheetCore.Action> {
-    return store.scope(state: \.storageTypeSelectionSheetState, action: CoreAction.storageSelctionSheetAction)
+  var ingredientInputFormCardListStore: StoreOf<IngredientInputFormCardListCore> {
+    return store.scope(state: \.ingredientInputFormCardListState, action: CoreAction.ingredientInputFormCardListAction)
   }
 }
 

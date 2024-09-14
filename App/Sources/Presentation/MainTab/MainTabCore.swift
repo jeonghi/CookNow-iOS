@@ -81,7 +81,7 @@ public struct MainTabCore: Reducer {
         
         // MARK: SubActions
       
-      case .ingredientBoxAction(.ingredientInputFormAction(.removeAllIngredients)):
+      case .ingredientBoxAction(.ingredientInputFormAction(.requestSaveMyIngredientsSuccess)):
         state.selectedTab = .Refrigerator
         return .none
       case .ingredientBoxAction:
@@ -96,7 +96,6 @@ public struct MainTabCore: Reducer {
       case .settingAction(let actions):
         return .none
       }
-      
     }
     
     Scope(state: \.refrigeratorState, action: /Action.refrigeratorAction) {
