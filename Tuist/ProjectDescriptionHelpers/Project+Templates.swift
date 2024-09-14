@@ -23,9 +23,10 @@ public extension Project {
       targets: [
         .target(
           name: appName,
-          destinations: .iOS,
+          destinations: Environment.destinations,
           product: .app,
           bundleId: "\(Environment.bundleId)",
+          deploymentTargets: Environment.deploymentTargets,
           infoPlist: infoPlist ?? .extendingDefault(with: [
             "UILaunchStoryboardName": "Launch Screen.storyboard"
           ]),
@@ -53,9 +54,10 @@ public extension Project {
       targets: [
         .target(
           name: moduleName,
-          destinations: .iOS,
+          destinations: Environment.destinations,
           product: Environment.forPreview ? Product.framework : Product.staticFramework,
           bundleId: "\(Environment.bundleId).app.\(moduleName)",
+          deploymentTargets: Environment.deploymentTargets,
           infoPlist: .default,
           sources: ["Sources/**"],
           resources: ["Resources/**"],
@@ -79,9 +81,10 @@ public extension Project {
       targets: [
         .target(
           name: moduleName,
-          destinations: .iOS,
+          destinations: Environment.destinations,
           product: .staticLibrary,
           bundleId: "\(Environment.bundleId).app.\(moduleName)",
+          deploymentTargets: Environment.deploymentTargets,
           infoPlist: .default,
           sources: ["Sources/**"],
           dependencies: dependencies,

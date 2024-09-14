@@ -20,6 +20,7 @@ import PackageDescription
 
 let package = Package(
     name: "CookNow",
+    platforms: [.iOS("16.0")],
     dependencies: [
       .package(
         url: "https://github.com/exyte/FloatingButton.git",
