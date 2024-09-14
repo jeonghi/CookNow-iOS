@@ -17,6 +17,8 @@ public enum AuthAPI {
   case refreshToken
   /// 토큰 검증하기
   case validateToken
+  /// 회원탈퇴하기
+  case withdrawl
 }
 
 extension AuthAPI: TargetType {
@@ -35,6 +37,8 @@ extension AuthAPI: TargetType {
       return .post
     case .validateToken:
       return .post
+    case .withdrawl:
+      return .delete
     }
   }
   
@@ -48,6 +52,8 @@ extension AuthAPI: TargetType {
       return "/oauth/refresh"
     case .validateToken:
       return "/oauth/verify-token"
+    case .withdrawl:
+      return "/oauth/withdraw"
     }
   }
   
@@ -71,22 +77,14 @@ extension AuthAPI: TargetType {
   }
   
   public var body: Data? {
-    let encoder = JSONEncoder()
-    switch self {
-    default:
-      return nil
-    }
+    return nil
   }
   
   public var sessionType: SessionType {
     switch self {
-    case .signIn:
+    case .signIn, .refreshToken:
       return .Auth
-    case .signOut:
-      return .AuthApi
-    case .refreshToken:
-      return .Auth
-    case .validateToken:
+    case .signOut, .validateToken, .withdrawl:
       return .AuthApi
     }
   }
