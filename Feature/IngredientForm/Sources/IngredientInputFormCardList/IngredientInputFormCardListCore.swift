@@ -24,11 +24,11 @@ public struct IngredientInputFormCardListCore: Reducer {
   // MARK: State
   public struct State: Equatable {
     
-    var isLoading: Bool
-    var formCardStateList: IdentifiedArrayOf<FormCard.State>
+    public var isLoading: Bool
+    public var formCardStateList: IdentifiedArrayOf<FormCard.State>
     var scrolledIngredientStorageId: IngredientStorage.ID?
     
-    var ingredientStorageList: [IngredientStorage] {
+    public var ingredientStorageList: [IngredientStorage] {
       formCardStateList.map { $0.ingredientStorage }
     }
     

@@ -32,6 +32,12 @@ public extension TargetDependency.Project {
     condition: nil
   )
   
+  static let IngredientForm = TargetDependency.project(
+    target: ModuleNameSpace.Feature.IngredientForm.rawValue,
+    path: .relativeToRoot("Feature/IngredientForm"),
+    condition: nil
+  )
+  
   static let Setting = TargetDependency.project(
     target: ModuleNameSpace.Feature.Setting.rawValue,
     path: .relativeToRoot("Feature/Setting"),

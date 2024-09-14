@@ -19,6 +19,7 @@ public extension ModuleNameSpace {
     case IngredientBox = "IngredientBox"
     case Setting = "Setting"
     case Refrigerator = "Refrigerator"
+    case IngredientForm = "IngredientForm"
   }
   
   enum Common: String {

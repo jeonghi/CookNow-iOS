@@ -15,7 +15,8 @@ let project = Project.makeFramework(
     .Project.DesignSystem,
     .Project.Domain,
     .ExternalProject.TCA,
-    .Project.CNNetwork
+    .Project.CNNetwork,
+    .Project.IngredientForm
   ]
 )
 
