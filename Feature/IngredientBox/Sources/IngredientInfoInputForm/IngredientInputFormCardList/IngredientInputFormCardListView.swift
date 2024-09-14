@@ -35,7 +35,7 @@ public struct IngredientInputFormCardListView: BaseFeatureViewType {
 }
 
 // MARK: Layout
-extension <#Feature#>View: View {
+extension IngredientInputFormCardListView: View {
   
   public var body: some View {
     ZStack {
@@ -47,13 +47,13 @@ extension <#Feature#>View: View {
 }
 
 // MARK: Componet
-extension <#Feature#>View {
+extension IngredientInputFormCardListView {
   
 }
 
 #Preview {
   NavigationView {
-    <#Feature#>View()
+    IngredientInputFormCardListView()
       .environment(\.locale, .init(identifier: "ko"))
   }
 }
