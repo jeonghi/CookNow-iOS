@@ -15,6 +15,7 @@ public enum IngredientAPI {
   case saveMyIngredients(SaveMyIngredientDTO.Request)
   case getMyIngredients
   case updateMyIngredients(UpdateMyIngredientDTO.Request)
+  case deleteMyIngredients(DeleteMyIngredientDTO.Request)
 }
 
 extension IngredientAPI: TargetType {
@@ -27,6 +28,8 @@ extension IngredientAPI: TargetType {
     switch self {
     case .saveMyIngredients:
       return .post
+    case .deleteMyIngredients:
+      return .delete
     default:
       return .get
     }
@@ -40,7 +43,7 @@ extension IngredientAPI: TargetType {
       return "/categories/ingredients"
     case .findIngredients(let categoryId):
       return "/category/\(categoryId)/ingredients"
-    case .saveMyIngredients, .getMyIngredients, .updateMyIngredients:
+    case .saveMyIngredients, .getMyIngredients, .updateMyIngredients, .deleteMyIngredients:
       return "/user/3/items"
     }
   }
@@ -65,6 +68,8 @@ extension IngredientAPI: TargetType {
     case .saveMyIngredients(let ingredients):
       return try? JSONEncoder().encode(ingredients)
     case .updateMyIngredients(let ingredients):
+      return try? JSONEncoder().encode(ingredients)
+    case .deleteMyIngredients(let ingredients):
       return try? JSONEncoder().encode(ingredients)
     default:
       return nil
