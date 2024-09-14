@@ -22,15 +22,33 @@ enum AppAppearance {
     
     let titleTextAttributes: [NSAttributedString.Key: Any] = [
       .foregroundColor: UIColor.asset(.black),
+      .font: UIFont.asset(.caption),
     ]
-    
+        
     appearance.titleTextAttributes = titleTextAttributes
     appearance.backgroundColor = .asset(.white)
     appearance.configureWithTransparentBackground()
+    
+    // UIBarButtonItemAppearance
+    let buttonAppearance = UIBarButtonItemAppearance()
+    buttonAppearance.normal.titleTextAttributes = [
+      .foregroundColor: UIColor.asset(.clear)
+    ]
+    
+    appearance.backButtonAppearance = buttonAppearance
+    appearance.doneButtonAppearance = buttonAppearance
+    
+    let image = UIImage(systemName: "chevron.backward")!
+      .withTintColor(.asset(.primary600), renderingMode: .alwaysOriginal)
+      .withAlignmentRectInsets(UIEdgeInsets(top: 0, left: -10, bottom: 0, right: 10))
+    
+    appearance.setBackIndicatorImage(image, transitionMaskImage: image)
+    
     // UINavigationBar.appearance()
     let navigationBarAppearance = UINavigationBar.appearance()
     navigationBarAppearance.standardAppearance = appearance
     navigationBarAppearance.scrollEdgeAppearance = appearance
+    navigationBarAppearance.compactAppearance = appearance
   }
   
   private static func configureTabBarAppearance() {
