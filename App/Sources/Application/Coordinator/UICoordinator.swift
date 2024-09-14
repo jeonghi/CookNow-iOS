@@ -22,20 +22,17 @@ final class UICoordinator: Reducer {
 
   // MARK: State
   struct State {
-    var route: AppRoute = .splash
   }
   
   // MARK: Action
   enum Action {
     case addTokenExpirationObserver
     case handleTokenExpiration
-    case updateRoute(AppRoute)
   }
   
   var body: some ReducerOf<UICoordinator> {
     Reduce { state, action in
       switch action {
-        
       case .addTokenExpirationObserver:
         return .publisher {
           Future { callback in
@@ -49,10 +46,6 @@ final class UICoordinator: Reducer {
          }
         
       case .handleTokenExpiration:
-        return .send(.updateRoute(.onboarding))
-        
-      case let .updateRoute(route):
-        state.route = route
         return .none
       }
     }
@@ -60,7 +53,6 @@ final class UICoordinator: Reducer {
 }
 
 enum AppRoute {
-  case splash
   case onboarding
   case mainTab
 }

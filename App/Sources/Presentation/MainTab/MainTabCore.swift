@@ -28,6 +28,7 @@ public struct MainTabCore: Reducer {
     var isLoading: Bool
     var refrigeratorState: RefrigeratorHomeCore.State = .init()
     var ingredientBoxState: IngredientBoxCore.State = .init()
+    var settingState: SettingCore.State = .init()
     
     var selectedTab: MainTabType = .Refrigerator
     
@@ -53,6 +54,7 @@ public struct MainTabCore: Reducer {
     // MARK: SubActions
     case refrigeratorAction(RefrigeratorHomeCore.Action)
     case ingredientBoxAction(IngredientBoxCore.Action)
+    case settingAction(SettingCore.Action)
   }
   
   // MARK: Reduce
@@ -86,6 +88,8 @@ public struct MainTabCore: Reducer {
           return .none
         }
         return .none
+      case .settingAction(let actions):
+        return .none
       }
       
     }
@@ -96,6 +100,10 @@ public struct MainTabCore: Reducer {
     
     Scope(state: \.ingredientBoxState, action: /Action.ingredientBoxAction) {
       IngredientBoxCore()
+    }
+    
+    Scope(state: \.settingState, action: /Action.settingAction) {
+      SettingCore()
     }
   }
 }

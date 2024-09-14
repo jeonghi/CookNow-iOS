@@ -11,140 +11,76 @@ import Dependencies
 import Onboading
 
 struct RootCore: Reducer {
-  
+
   // MARK: Dependencies
   @Dependency(\.authService) private var authService
-  
+
   // MARK: Constructor
-  init() {
-    
-  }
-  
+  init() {}
+
   // MARK: State
   struct State {
-    
     var isLoading: Bool
-    
-    var splashState: SplashCore.State?
     var mainTabState: MainTabCore.State?
     var onboardingState: OnboadingCore.State?
-    
+    var splashState: SplashCore.State?
     var coordinatorState: UICoordinator.State = .init()
-    var route: AppRoute { coordinatorState.route }
-    
-    public init(
-      isLoading: Bool = false
-    ) {
+    var route: AppRoute?
+
+    public init(isLoading: Bool = false) {
       self.isLoading = isLoading
     }
   }
 
-  
   // MARK: Action
- enum Action {
-    // MARK: Life Cycle
-    case onLoad
+  enum Action {
     case onAppear
     case onDisappear
+    case onLoad
     case isLoading(Bool)
-    
-    // MARK: View defined Action
-   
-    // MARK: Networking
-    
-    // MARK: Child Reducer action
+    case onSceneActive
+    case activeSplash(Bool)
+    case updateRoute(AppRoute?)
     case splashAction(SplashCore.Action)
     case mainTabAction(MainTabCore.Action)
     case onboardingAction(OnboadingCore.Action)
-    
-    // MARK: Shared Reducer action
     case coordinatorAction(UICoordinator.Action)
   }
-  
+
   // MARK: Reduce
   var body: some ReducerOf<Self> {
-    
     Reduce { state, action in
       switch action {
-        // MARK: Life Cycle
-      case .onAppear:
-        return .run { send in
-          await send(.coordinatorAction(.addTokenExpirationObserver))
-          await send(.coordinatorAction(.updateRoute(.splash)))
-        }
-      case .onDisappear:
+      case .onAppear, .onDisappear:
         return .none
+
       case .onLoad:
-        return .none
+        return handleOnLoad()
+
       case .isLoading(let isLoading):
         state.isLoading = isLoading
         return .none
-        // MARK: View defined Action
+
+      case .onSceneActive:
+        return handleSceneActive()
+
+      case .activeSplash(let isActive):
+        return handleActiveSplash(&state, isActive)
+
+      case .updateRoute(let updated):
+        return handleUpdateRoute(&state, updated)
+
+      case let .splashAction(actions):
+        return handleSplashAction(&state, actions)
         
-        // MARK: Networking
-        
-        // MARK: Childe Reducer action
-      case .splashAction(let actions):
-        switch actions {
-        case .tokenIsNotValid: // 토큰이 유효하지 않으면 온보딩으로
-          return .run { send in
-            await send(.coordinatorAction(.updateRoute(.onboarding)))
-          }
-        case .tokenIsValid: // 토큰이 유효하면 메인탭으로
-          return .run { send in
-            await send(.coordinatorAction(.updateRoute(.mainTab)))
-          }
-        default:
-          return .none
-        }
-      case .onboardingAction(let actions):
-        switch actions {
-        case .appleSignInButtonTapped:
-          return .run { send in
-            do {
-              try await authService.appleSignIn()
-              await send(.coordinatorAction(.updateRoute(.mainTab)))
-            } catch {
-              
-            }
-          }
-        case .googleSignInButtonTapped:
-          return .run { send in
-            do {
-              try await authService.googleSignIn()
-              await send(.coordinatorAction(.updateRoute(.mainTab)))
-            } catch {
-              
-            }
-          }
-        default:
-          return .none
-        }
-      case .mainTabAction(let actions):
-        return .none
-        
-        // MARK: Shared Reducer action
-      case .coordinatorAction(let coordinatorAction):
-        if case let .updateRoute(route) = coordinatorAction {
-          switch route {
-          case .splash:
-            state.splashState = .init()
-            state.onboardingState = nil
-            state.mainTabState = nil
-            return .none
-          case .onboarding:
-            state.onboardingState = .init()
-            state.splashState = nil
-            state.mainTabState = nil
-            return .none
-          case .mainTab:
-            state.mainTabState = .init()
-            state.onboardingState = nil
-            state.splashState = nil
-            return .none
-          }
-        }
-        return .none
+      case let .mainTabAction(actions):
+        return handleMainTabAction(&state, actions)
+
+      case let .onboardingAction(actions):
+        return handleOnboardingAction(actions)
+
+      case let .coordinatorAction(actions):
+        return handleCoordinatorAction(actions)
       }
     }
     .ifLet(\.mainTabState, action: /Action.mainTabAction) {
@@ -156,14 +92,117 @@ struct RootCore: Reducer {
     .ifLet(\.splashState, action: /Action.splashAction) {
       SplashCore()
     }
-    
-    
     Scope(state: \.coordinatorState, action: /Action.coordinatorAction) {
       UICoordinator()
     }
   }
 }
 
+// MARK: - Helper Functions
 extension RootCore {
-}
 
+  private func handleOnLoad() -> Effect<Action> {
+    return .run { send in
+      await send(.coordinatorAction(.addTokenExpirationObserver))
+    }
+  }
+
+  private func handleSceneActive() -> Effect<Action> {
+    return .run { send in
+      await send(.activeSplash(true))
+    }
+  }
+
+  private func handleActiveSplash(_ state: inout State, _ isActive: Bool) -> Effect<Action> {
+    state.splashState = isActive ? .init() : nil
+    return .none
+  }
+
+  private func handleUpdateRoute(_ state: inout State, _ updated: AppRoute?) -> Effect<Action> {
+    
+    let oldRoute = state.route
+    let newRoute = updated
+    
+    if oldRoute != newRoute {
+      if let updated {
+        switch updated {
+        case .onboarding:
+          state.onboardingState = .init()
+          state.mainTabState = nil
+        case .mainTab:
+          state.mainTabState = .init()
+          state.onboardingState = nil
+        }
+      } else {
+        state.onboardingState = nil
+        state.mainTabState = nil
+      }
+      
+      state.route = newRoute
+    }
+    return .none
+  }
+
+  private func handleSplashAction(_ state: inout State, _ actions: SplashCore.Action) -> Effect<Action> {
+    switch actions {
+    case .tokenIsNotValid:
+      return .run { send in
+        await send(.updateRoute(.onboarding))
+        await send(.activeSplash(false))
+      }
+    case .tokenIsValid:
+      return .run { send in
+        await send(.updateRoute(.mainTab))
+        await send(.activeSplash(false))
+      }
+    default:
+      return .none
+    }
+  }
+
+  private func handleOnboardingAction(_ actions: OnboadingCore.Action) -> Effect<Action> {
+    switch actions {
+    case .appleSignInButtonTapped:
+      return .run { send in
+        do {
+          try await authService.appleSignIn()
+          await send(.isLoading(true))
+          try await authService.cnSignIn()
+          await send(.isLoading(false))
+          await send(.updateRoute(.mainTab))
+        } catch {
+          // handle error
+        }
+      }
+    case .googleSignInButtonTapped:
+      return .run { send in
+        do {
+          try await authService.googleSignIn()
+          await send(.isLoading(true))
+          try await authService.cnSignIn()
+          await send(.isLoading(false))
+          await send(.updateRoute(.mainTab))
+        } catch {
+          // handle error
+        }
+      }
+    default:
+      return .none
+    }
+  }
+  
+  private func handleMainTabAction(_ state: inout State, _ actions: MainTabCore.Action) -> Effect<Action> {
+    return .none
+  }
+
+  private func handleCoordinatorAction(_ actions: UICoordinator.Action) -> Effect<Action> {
+    switch actions {
+    case .handleTokenExpiration:
+      return .run { send in
+        await send(.updateRoute(.onboarding))
+      }
+    default:
+      return .none
+    }
+  }
+}

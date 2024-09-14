@@ -17,9 +17,10 @@ struct RootView: BaseFeatureViewType {
   let store: StoreOf<Core>
   
   @ObservedObject var viewStore: ViewStore<ViewState, CoreAction>
+  @Environment(\.scenePhase) private var scenePhase
   
   struct ViewState: Equatable {
-    var route: AppRoute
+    var route: AppRoute?
     var isLoading: Bool
     init(state: CoreState) {
       route = state.route
@@ -44,27 +45,39 @@ extension RootView: View {
   
   var body: some View {
     ZStack {
-      switch viewStore.route {
-      case .splash:
-        IfLetStore(splashStore) { store in
-          SplashView(store)
-        }
-      case .onboarding:
-        IfLetStore(onboardingStore) { store in
-          OnboardingView(store)
-        }
-      case .mainTab:
-        IfLetStore(mainTabStore) { store in
-          MainTabView(store)
+      if let route = viewStore.route {
+        switch route {
+        case .onboarding:
+          IfLetStore(onboardingStore) { store in
+            OnboardingView(store)
+          }
+        case .mainTab:
+          IfLetStore(mainTabStore) { store in
+            NavigationWrapper {
+              MainTabView(store)
+            }
+          }
         }
       }
+      
+      IfLetStore(splashStore) { store in
+        SplashView(store)
+      }
     }
+    .kerning(-0.6) // 자간 -0.6
+    .ignoresSafeArea(edges: [.horizontal, .top])
     .cnLoading(viewStore.isLoading)
     .onAppear {
       viewStore.send(.onAppear)
     }
-    .ignoresSafeArea(edges: [.horizontal, .top])
-    .kerning(-0.6) // 자간 -0.6
+    .onLoad {
+      viewStore.send(.onLoad)
+    }
+    .onChange(of: scenePhase) { _, newPhase in
+      if newPhase == .active {
+        viewStore.send(.onSceneActive)
+      }
+    }
   }
 }
 

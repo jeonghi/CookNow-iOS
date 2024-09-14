@@ -51,7 +51,6 @@ public struct MainTabView: BaseFeatureViewType {
 
 extension MainTabView: View {
   public var body: some View {
-    
     TabView(selection: viewStore.binding(get: \.selectedTab, send: CoreAction.selectTab)) {
       ForEach(MainTabType.allCases, id: \.self) { tabType in
         
@@ -59,23 +58,26 @@ extension MainTabView: View {
         ZStack {
           switch tabType {
           case .Refrigerator:
-            NavigationWrapper {
-                RefrigeratorHomeView(refrigeratorStore)
-                  .navigationTitle(tabType.title)
-                  .navigationBarTitleDisplayMode(.inline)
-            }
+            //            NavigationWrapper {
+            RefrigeratorHomeView(refrigeratorStore)
+              .navigationBarTitleDisplayMode(.inline)
+//              .navigationTitle(tabType.title)
+//                          .navigationBarTitleDisplayMode(.inline)
+            //            }
           case .IngredientsBox:
-            NavigationWrapper {
-              IngredientBoxView(ingredientBoxStore)
-                .navigationTitle(tabType.title)
-                .navigationBarTitleDisplayMode(.inline)
-            }
+            //            NavigationWrapper {
+            IngredientBoxView(ingredientBoxStore)
+              .navigationBarTitleDisplayMode(.inline)
+//              .navigationTitle(tabType.title)
+
+            //            }
           case .Setting:
-            NavigationWrapper {
-                SettingView()
-                  .navigationTitle(tabType.title)
-                  .navigationBarTitleDisplayMode(.inline)
-            }
+            //            NavigationWrapper {
+            SettingView(settingStore)
+              .navigationBarTitleDisplayMode(.inline)
+//              .navigationTitle(tabType.title)
+//              .navigationBarTitleDisplayMode(.inline)
+            //            }
           }
         }
         .hideKeyboardWhenTappedAround()
@@ -91,6 +93,13 @@ extension MainTabView: View {
         .tag(tabType)
       }
     } //: TabView
+    .toolbar {
+      ToolbarItem(placement: .principal) {
+        Text(viewStore.selectedTab.title)
+          .font(.asset(.bodyBold3))
+      }
+    }
+    .toolbarTitleDisplayMode(.inline)
     .tint(Color.asset(.primary700))
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
@@ -104,10 +113,16 @@ private extension MainTabView {
   private var refrigeratorStore: StoreOf<RefrigeratorHomeCore> {
     return store.scope(state: \.refrigeratorState, action: CoreAction.refrigeratorAction)
   }
+  
+  private var settingStore: StoreOf<SettingCore> {
+    return store.scope(state: \.settingState, action: CoreAction.settingAction)
+  }
 }
 
 
 @available(iOS 17.0, *)
 #Preview {
-  MainTabView()
+  NavigationWrapper {
+    MainTabView()
+  }
 }

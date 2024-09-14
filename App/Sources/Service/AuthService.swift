@@ -23,9 +23,9 @@ protocol AuthServiceType {
   func appleSignIn() async throws
   func appleSignOut() async throws
   func validateToken() async throws
+  func cnSignIn() async throws
 }
 
-@MainActor
 struct AuthServiceDependencyKey: DependencyKey {
   static let liveValue: AuthServiceType = AuthServiceImpl.shared
 }
@@ -41,10 +41,12 @@ extension DependencyValues {
   }
 }
 
+@MainActor
 final class AuthServiceImpl: NSObject {
   
   private var network: CNNetwork.Network<CNNetwork.AuthAPI>
   private let tokenManager = TokenManager.shared
+  private var idToken: String?
   
   static let shared: AuthServiceType = AuthServiceImpl()
   
@@ -61,44 +63,19 @@ final class AuthServiceImpl: NSObject {
   private func signInWithFirebase(using credential: FirebaseAuth.AuthCredential) async throws {
     
     let authResult = try await FirebaseAuth.Auth.auth().signIn(with: credential)
-    
-    let idToken = try await authResult.user.getIDToken()
-    
-    let jwtToken = try await signInWithCNAuthServer(using: idToken)
-    
-    try await MainActor.run {
-      guard tokenManager.setToken(jwtToken) != nil else {
-        throw AuthServiceError.tokenStorageFailed
-      }
-    }
+    self.idToken = try await authResult.user.getIDToken()
+    return
   }
   
-  /// 쿡나우 인증 서버에 signIn 요청을 보냅니다.
-  private func signInWithCNAuthServer(using idToken: String) async throws -> JWTToken {
-    try await withCheckedThrowingContinuation { continuation in
-      network.responseData(.signIn(.init(idToken)), SignInDTO.Response.self) { result in
-        switch result {
-        case .success(let res):
-          let jwtToken = JWTToken.init(accessToken: res.accessToken, refreshToken: res.refreshToken)
-          continuation.resume(returning: jwtToken)
-        case .failure(let error):
-          continuation.resume(throwing: error)
-        }
-      }
+  /// 쿡나우 인증 서버에 signIn 요청을
+  func cnSignIn() async throws {
+    guard let idToken else {
+      throw AuthServiceError.tokenStorageFailed
     }
-  }
-  
-  private func signOutWithCNAuthServer() async throws {
-    try await withCheckedThrowingContinuation { continuation in
-      network.responseData(.signOut, SignOutDTO.Response.self) { result in
-        switch result {
-        case .success(let res):
-          continuation.resume()
-        case .failure(let error):
-          continuation.resume(throwing: error)
-        }
-      }
-    }
+    let res = try await network.responseData(.signIn(.init(idToken)), SignInDTO.Response.self)
+    let jwtToken = JWTToken.init(accessToken: res.accessToken, refreshToken: res.refreshToken)
+    tokenManager.setToken(jwtToken)
+    return
   }
 }
 
