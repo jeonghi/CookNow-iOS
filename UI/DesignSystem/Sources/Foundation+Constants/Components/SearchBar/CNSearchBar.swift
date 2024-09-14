@@ -65,6 +65,9 @@ public struct CNSearchBar: View {
           .foregroundColor(_iconTintColor)
         TextField(_placeholder, text: $_text)
           .textFieldStyle(.plain)
+          .autocorrectionDisabled()
+          .speechSpellsOutCharacters(true)
+          
           .tint(_placeholderColor)
           .font(.asset(.body2))
           .kerning(-0.6)
@@ -99,7 +102,7 @@ public struct CNSearchBar: View {
       RoundedRectangle(cornerRadius: _cornerRadius)
         .stroke(_borderColor, lineWidth: _borderWidth)
     )
-    .hideKeyboardWhenTappedAround()
+//    .hideKeyboardWhenTappedAround()
   }
 }
 
