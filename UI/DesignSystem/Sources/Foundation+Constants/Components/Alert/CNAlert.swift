@@ -61,6 +61,8 @@ public extension View {
         .padding(.horizontal, Metric.horizontalPadidng)
       } customize: {
         $0
+          .animation(.spring())
+          .isOpaque(true)
           .type(.toast)
           .position(.center)
           .dragToDismiss(true)
@@ -71,10 +73,14 @@ public extension View {
   }
 }
 
-public struct CNAlertState: Equatable {
+public struct CNAlertState: Hashable {
   
   public static func == (lhs: CNAlertState, rhs: CNAlertState) -> Bool {
     lhs.id == rhs.id
+  }
+  
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
   }
   
   private let id = UUID()
@@ -98,6 +104,7 @@ public struct CNAlertState: Equatable {
 }
 
 public struct CNAlertButton {
+  
   let label: String
   let action: (() -> Void)?
   

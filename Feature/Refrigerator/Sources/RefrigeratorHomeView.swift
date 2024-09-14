@@ -22,7 +22,6 @@ public struct RefrigeratorHomeView: BaseFeatureViewType {
   
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
-  
   @State private var isIconVisible: Bool = true
   
   public struct ViewState: Equatable {
@@ -40,6 +39,8 @@ public struct RefrigeratorHomeView: BaseFeatureViewType {
     var selectedIngredients: Set<IngredientStorage.ID>
     var scrollToIngredientId: IngredientStorage.ID?
     
+    var alertState: CNAlertState?
+    
     public init(state: CoreState) {
       categories = state.categories
       isOpenFloatingButton = state.isOpenFloatingButton
@@ -52,6 +53,7 @@ public struct RefrigeratorHomeView: BaseFeatureViewType {
       expiredSoonIngredients = state.expiredSoonIngredientStorages
       selectedIngredients = state.selectedIngredients
       scrollToIngredientId = state.scrollToIngredientID
+      alertState = state.alertState
     }
   }
   
@@ -84,18 +86,64 @@ extension RefrigeratorHomeView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.asset(.bgMain))
     .ignoresSafeArea(edges: [.horizontal])
-    .applyIf(viewStore.isOpenFloatingButton) {
-      $0.overlay {
-        Color.black.opacity(0.6)
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-      }
-    }
-    .applyIf(viewStore.filteredIngredients.count > 0){
-      $0.overlay(alignment: .bottomTrailing) {
-        floattingButtonView()
-          .padding()
-      }
-    }
+    .cnFloattingButton(
+      isOpen: viewStore.binding(
+        get: \.isOpenFloatingButton,
+        send: CoreAction.isOpenFloatingButton
+      ),
+      mainButton: .init(
+        label: "\(viewStore.selectedIngredients.count)",
+        action: { viewStore.send(.toggleFloatingButton) }
+      ),
+      // 선택한 재료 갯수
+      subButtons: [
+        .init(label: "삭제", action: {
+          let alertState = CNAlertState(
+            title: "삭제",
+            description: "선택한 재료들을 삭제하시겠습니까?",
+            primaryButton: .init(label: "삭제", action: {
+              viewStore.send(.tappedFloatingButton(.delete))
+            }),
+            secondaryButton: .init(label: "취소", action: {
+              viewStore.send(.dismissAlert)
+            })
+          )
+          viewStore.send(.updateAlertState(alertState))
+        }),
+        .init(label: "수정", action: {
+          let alertState = CNAlertState(
+            title: "수정",
+            description: "선택한 재료들을 수정하시겠습니까?",
+            primaryButton: .init(label: "수정", action: {
+              viewStore.send(.tappedFloatingButton(.modify))
+            }),
+            secondaryButton: .init(label: "취소", action: {
+              viewStore.send(.dismissAlert)
+            })
+          )
+          viewStore.send(.updateAlertState(alertState))
+        }),
+        .init(label: "전체취소", action: {
+          let alertState = CNAlertState(
+            title: "전체취소",
+            description: "선택한 재료들을 전부 취소하시겠습니까?",
+            primaryButton: .init(label: "네", action: {
+              viewStore.send(.tappedFloatingButton(.allCancel))
+            }),
+            secondaryButton: .init(label: "아니오", action: {
+              viewStore.send(.dismissAlert)
+            })
+          )
+          viewStore.send(.updateAlertState(alertState))
+        })
+      ]
+    )
+    .cnAlert(
+      viewStore.binding(
+        get: \.alertState,
+        send: CoreAction.updateAlertState
+      )
+    )
     .kerning(-0.6) // 자간 -0.6
     .cnLoading(viewStore.isLoading)
     .onAppear { viewStore.send(.onAppear) }
@@ -105,14 +153,70 @@ extension RefrigeratorHomeView: View {
 
 extension RefrigeratorHomeView {
   
+  private func floatingButtonView() -> some View {
+    Group {
+      if viewStore.filteredIngredients.count > 0 {
+        cnFloattingButton(
+          isOpen: viewStore.binding(
+            get: \.isOpenFloatingButton,
+            send: CoreAction.isOpenFloatingButton
+          ),
+          mainButton: .init(label: "\(viewStore.selectedIngredients.count)"),
+          subButtons: [
+            .init(label: "삭제", action: {
+              let alertState = CNAlertState(
+                title: "삭제",
+                description: "선택한 재료들을 삭제하시겠습니까?",
+                primaryButton: .init(label: "삭제", action: {
+                  viewStore.send(.tappedFloatingButton(.delete))
+                }),
+                secondaryButton: .init(label: "취소", action: {
+                  viewStore.send(.dismissAlert)
+                })
+              )
+              viewStore.send(.updateAlertState(alertState))
+            }),
+            .init(label: "수정", action: {
+              let alertState = CNAlertState(
+                title: "수정",
+                description: "선택한 재료들을 수정하시겠습니까?",
+                primaryButton: .init(label: "수정", action: {
+                  viewStore.send(.tappedFloatingButton(.modify))
+                }),
+                secondaryButton: .init(label: "취소", action: {
+                  viewStore.send(.dismissAlert)
+                })
+              )
+              viewStore.send(.updateAlertState(alertState))
+            }),
+            .init(label: "전체취소", action: {
+              let alertState = CNAlertState(
+                title: "전체취소",
+                description: "선택한 재료들을 전부 취소하시겠습니까?",
+                primaryButton: .init(label: "네", action: {
+                  viewStore.send(.tappedFloatingButton(.allCancel))
+                }),
+                secondaryButton: .init(label: "아니오", action: {
+                  viewStore.send(.dismissAlert)
+                })
+              )
+              viewStore.send(.updateAlertState(alertState))
+            })
+          ]
+        )
+      }
+    }
+  }
+  
+  
   @ViewBuilder
   private func topBarView() -> some View {
     VStack(spacing: 15) {
       
-//      if(isIconVisible) {
-        infoBoxView()
-          .padding(.horizontal, 20)
-//      }
+      //      if(isIconVisible) {
+      infoBoxView()
+        .padding(.horizontal, 20)
+      //      }
       
       if case .expiredSoon(_, _) = viewStore.currStatus {
         expireSoonIngredientsScrollView()
@@ -320,6 +424,7 @@ extension RefrigeratorHomeView {
           CNAsyncImage(item.ingredient.imageUrl)
             .padding(5)
         }
+        .aspectRatio(1, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .overlay {
           RoundedRectangle(cornerRadius: 6)
@@ -347,6 +452,7 @@ extension RefrigeratorHomeView {
             .foregroundStyle(Color.asset(.primary500))
             .frame(width: 16, height: 16)
         }
+        .aspectRatio(1, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 6))
       }
     }
@@ -390,22 +496,6 @@ extension RefrigeratorHomeView {
     .font(.asset(.body3))
     .frame(maxWidth: .infinity)
     .frame(height: isIconVisible ? 68 : 48)
-  }
-  
-  
-  private func floattingButtonView() -> some View {
-    CNFloattingButton(
-      mainButtonView: mainButton(),
-      buttons: [
-        makeSubButton(title: "수정"),
-        makeSubButton(title: "레시피"),
-        makeSubButton(title: "삭제")
-      ],
-      isOpen: viewStore.binding(
-        get: \.isOpenFloatingButton,
-        send: CoreAction.isOpenFloatingButton
-      )
-    )
   }
   
   private func mainButton() -> some View {

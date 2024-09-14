@@ -9,6 +9,7 @@ import Foundation
 import ComposableArchitecture
 import Dependencies
 import Domain
+import DesignSystem
 
 public struct RefrigeratorHomeCore: Reducer {
   
@@ -22,6 +23,12 @@ public struct RefrigeratorHomeCore: Reducer {
   
   public typealias StorageType = Domain.StorageType
   
+  public enum FloatButtonType {
+    case delete
+    case modify
+    case allCancel
+  }
+  
   // MARK: State
   public struct State {
     
@@ -31,7 +38,7 @@ public struct RefrigeratorHomeCore: Reducer {
     var selectedStorageType: StorageType = .refrigerator
     var isOpenFloatingButton: Bool = false
     var scrollToIngredientID: IngredientStorage.ID? = nil // 스크롤할 ID를 저장
-
+    var alertState: CNAlertState?
     
     // 선택된 보관 유형에 맞는 재료
     var filteredIngredients: [IngredientStorage] {
@@ -103,18 +110,29 @@ public struct RefrigeratorHomeCore: Reducer {
     // MARK: View defined Action
     case refrigeratorTapped // 냉장고 탭 함
     case isOpenFloatingButton(Bool)
+    case toggleFloatingButton
     case selectStorageType(StorageType)
     case updateMyIngredients([IngredientStorage])
     case selectIngredient(IngredientStorage.ID)
+    case resetSelectIngredient
     case scrollTo(IngredientStorage.ID)
+    case deleteIngredients([IngredientStorage.ID])
     
     // MARK: 애니메이션
     case startTimer
     case stopTimer
     case timerTicked
     
+    // MARK: 플로팅 버튼
+    case tappedFloatingButton(FloatButtonType)
+    
+    // MARK: Alert창
+    case updateAlertState(CNAlertState?)
+    case dismissAlert
+    
     // MARK: Networking
     case requestGetMyIngredients
+    case requestDeleteMyIngredients
   }
   
   // MARK: Reduce
@@ -131,6 +149,7 @@ public struct RefrigeratorHomeCore: Reducer {
       case .onDisappear:
         return .run { send in
           await send(.stopTimer)
+          await send(.isOpenFloatingButton(false))
         }
       case .onLoad:
         return .none
@@ -160,6 +179,9 @@ public struct RefrigeratorHomeCore: Reducer {
               state.selectedIngredients.insert(ingredientId)
           }
         return .none
+      case .resetSelectIngredient:
+        state.selectedIngredients.removeAll()
+        return .none
         
       case .scrollTo(let ingredientId):
         guard let ingredient = state.ingredientStorages.first(where: { $0.id == ingredientId
@@ -169,6 +191,15 @@ public struct RefrigeratorHomeCore: Reducer {
         state.selectedStorageType = ingredient.storageType
         state.scrollToIngredientID = ingredientId
         return .none
+        
+      case .deleteIngredients(let deletedIds):
+        
+        let filtered = state.ingredientStorages.filter { !deletedIds.contains($0.id) }
+        
+        return .run { send in
+          await send(.updateMyIngredients(filtered))
+          await send(.resetSelectIngredient)
+        }
         
         // MARK: 애니메이션
       case .startTimer:
@@ -190,6 +221,38 @@ public struct RefrigeratorHomeCore: Reducer {
         state.isShaking.toggle()
         return .none
         
+        // MARK: 플로팅 버튼
+      case .tappedFloatingButton(let buttonType):
+        switch buttonType {
+        case .allCancel:
+          return .run { send in
+            await send(.dismissAlert) // 창 끄기
+            await send(.isOpenFloatingButton(false)) // 플로팅 버튼 끄기
+            await send(.resetSelectIngredient)
+          }
+        case .delete:
+          return .run { send in
+            await send(.dismissAlert) // 창 끄기
+            await send(.requestDeleteMyIngredients)
+            await send(.isOpenFloatingButton(false)) // 플로팅 버튼 끄기
+          }
+        case .modify:
+          return .run { send in
+            
+          }
+        }
+      case .toggleFloatingButton:
+        state.isOpenFloatingButton.toggle()
+        return .none
+        
+        // MARK: Alert창
+      case .updateAlertState(let updated):
+        state.alertState = updated
+        return .none
+      case .dismissAlert:
+        state.alertState = nil
+        return .none
+        
         // MARK: Networking
       case .requestGetMyIngredients:
         return .run { send in
@@ -203,6 +266,23 @@ public struct RefrigeratorHomeCore: Reducer {
           }
         }
         .cancellable(id: Action.requestGetMyIngredients.self, cancelInFlight: true)
+      case .requestDeleteMyIngredients:
+        
+        let ids = state.selectedIngredients.sorted()
+        
+        return .run { send in
+          await send(.isLoading(true))
+          do {
+            // 삭제 요청
+            let deletedIds = try await ingredientService.deleteMyIngredients(ids)
+            
+            // 선택한 거 비우기
+            await send(.deleteIngredients(deletedIds))
+            await send(.isLoading(false))
+          } catch {
+            
+          }
+        }
       }
     }
   }
