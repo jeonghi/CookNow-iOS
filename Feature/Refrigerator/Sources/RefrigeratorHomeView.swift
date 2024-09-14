@@ -258,7 +258,9 @@ extension RefrigeratorHomeView {
         }
         .onPreferenceChange(ScrollOffsetKey.self) { offset in
           withAnimation(.easeInOut) {
-            isIconVisible = offset > -100
+            DispatchQueue.main.async {
+              isIconVisible = offset > -100
+            }
           }
         }
       }
