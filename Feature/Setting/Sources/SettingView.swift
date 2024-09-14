@@ -17,14 +17,18 @@ public struct SettingView: BaseFeatureViewType {
   public typealias Core = SettingCore
   public let store: StoreOf<Core>
   
+  typealias SheetType = Core.SheetType
+  
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
   
   public struct ViewState: Equatable {
     var isLoading: Bool
     var alertState: CNAlertState?
+    var sheetType: SheetType?
     public init(state: CoreState) {
       isLoading = state.isLoading
       alertState = state.alertState
+      sheetType = state.sheetType
     }
   }
   
@@ -78,14 +82,22 @@ extension SettingView: View {
     .foregroundStyle(Color.asset(.gray800))
     .font(.asset(.body3))
     .kerning(-0.6)
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color.asset(.bgMain))
     .cnAlert(
       viewStore.binding(
         get: \.alertState,
         send: CoreAction.updateAlertState
       )
     )
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color.asset(.bgMain))
+    .sheet(
+      item: viewStore.binding(
+        get: \.sheetType,
+        send: CoreAction.setSheetType
+      )
+    ) { type in
+      CNWebView(url: type.url)
+    }
   }
 }
 
@@ -105,18 +117,17 @@ extension SettingView {
     case .versionInfo:
       HStack {
         Text("앱 버전 정보")
-        Spacer()
-        Text("1.0.0")
+        Text("1.0.0").hTrailing()
       }
       
     case .qna:
-      NavigationLink(destination: CNWebView(Constants.csWebUrl)) {
-        Text("고객센터")
+      Button(action: { viewStore.send(.setSheetType(.cs)) }){
+        Text("고객센터").hLeading()
       }
       
     case .announcement:
-      NavigationLink(destination: CNWebView(Constants.tosWebUrl)) {
-        Text("약관 및 정책")
+      Button(action: { viewStore.send(.setSheetType(.tos)) }){
+        Text("약관 및 정책").hLeading()
       }
     }
   }
@@ -158,6 +169,8 @@ extension SettingView {
 #if(DEBUG)
 @available(iOS 17.0, *)
 #Preview {
-  SettingView()
+  NavigationStack {
+    SettingView()
+  }
 }
 #endif

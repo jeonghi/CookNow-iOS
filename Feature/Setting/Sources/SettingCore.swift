@@ -14,15 +14,36 @@ import DesignSystem
 public struct SettingCore: Reducer {
   
   // MARK: Dependencies
-  let tokenManager: TokenManager = .shared
+  @Dependency(\.authService) private var authService
   
   // MARK: Constructor
   public init() {}
   
+  public enum SheetType: Identifiable {
+    
+    public var id: Self {
+        return self
+    }
+    
+    case tos
+    case cs
+    
+    var url: URL? {
+      switch self {
+      case .cs:
+        return Constants.csWebUrl
+      case .tos:
+        return Constants.tosWebUrl
+      }
+    }
+  }
+  
   // MARK: State
   public struct State: Equatable {
+    
     var isLoading: Bool
     var alertState: CNAlertState?
+    var sheetType: SheetType?
     
     public init(
       isLoading: Bool = false
@@ -44,7 +65,9 @@ public struct SettingCore: Reducer {
     case withdrawlButtonTapped
     case cancelAlert
     case updateAlertState(CNAlertState?)
-    
+    case setSheetType(SheetType?)
+    case tosButtonTapped
+    case csButtonTapped
     // MARK: Networking
   }
   
@@ -67,10 +90,32 @@ public struct SettingCore: Reducer {
         
         // MARK: View defined Action
       case .logoutButtonTapped:
-        return .none
+        return .run { _ in
+          do {
+            try await authService.signOut()
+          } catch {
+            
+          }
+        }
         
       case .withdrawlButtonTapped:
-        return .none
+        return .run { _ in
+          do {
+            try await authService.withdrawl()
+          } catch {
+            
+          }
+        }
+      
+      case .csButtonTapped:
+        return .run { send in
+          await send(.setSheetType(.cs))
+        }
+        
+      case .tosButtonTapped:
+        return .run { send in
+          await send(.setSheetType(.tos))
+        }
         
       case .cancelAlert:
         state.alertState = nil
@@ -78,6 +123,10 @@ public struct SettingCore: Reducer {
         
       case .updateAlertState(let updated):
         state.alertState = updated
+        return .none
+        
+      case .setSheetType(let type):
+        state.sheetType = type
         return .none
         
         // MARK: Networking
