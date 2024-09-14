@@ -15,7 +15,13 @@ public struct CNSearchBar: View {
   
   // MARK: Private properties
   @Binding private var _text: String
-  @FocusState private var _textFieldIsFocused: Bool // iOS 15+
+  var textFieldIsFocused: FocusState<Bool>.Binding // iOS 15+
+  private var _textFieldIsFocused: Bool {
+    get {
+      textFieldIsFocused.wrappedValue
+    }
+  }
+  
   @Environment(\.isEnabled) private var _isEnabled: Bool
   
   private let _placeholder: String
@@ -38,11 +44,13 @@ public struct CNSearchBar: View {
   public init(
     text: Binding<String> = .constant(""),
     placeholder: String = "",
-    maxLength: Int = 60
+    maxLength: Int = 60,
+    isFocused: FocusState<Bool>.Binding
   ) {
     self.__text = text
     self._placeholder = placeholder
     self._maxLength = maxLength
+    self.textFieldIsFocused = isFocused
   }
   
   // MARK: Body
@@ -61,7 +69,7 @@ public struct CNSearchBar: View {
           .font(.asset(.body2))
           .kerning(-0.6)
           .disabled(!_isEnabled)
-          .focused($_textFieldIsFocused)
+          .focused(textFieldIsFocused)
           .limitInputLength(value: $_text, length: _maxLength)
         ZStack {
           if(!_text.isEmpty) {
@@ -77,6 +85,7 @@ public struct CNSearchBar: View {
             }
           }
         }
+        .opacity(_textFieldIsFocused ? 1 : 0)
         .frame(width: 24, height: 24)
       }
       .padding(.horizontal, 10)
@@ -163,8 +172,3 @@ private extension CNSearchBar {
 }
 
 #endif
-
-#Preview {
-  CNSearchBar(placeholder: "재료를 입력하세요.")
-    .padding(.horizontal, 10)
-}
