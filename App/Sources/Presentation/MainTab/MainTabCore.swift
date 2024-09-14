@@ -80,8 +80,13 @@ public struct MainTabCore: Reducer {
         // MARK: Networking
         
         // MARK: SubActions
-      case .ingredientBoxAction(let actions):
+      
+      case .ingredientBoxAction(.ingredientInputFormAction(.removeAllIngredients)):
+        state.selectedTab = .Refrigerator
         return .none
+      case .ingredientBoxAction:
+        return .none
+        
       case .refrigeratorAction(let actions):
         if case .refrigeratorTapped = actions {
           state.selectedTab = .IngredientsBox
