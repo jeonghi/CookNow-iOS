@@ -65,12 +65,17 @@ public struct SplashCore: Reducer {
         // MARK: Networking
       case .requestValidateToken:
         return .run { send in
+          
+          async let validateTokenResult = authService.validateToken
+          
           do {
-            try await authService.validateToken()
+            _ = try await (Task.sleep(nanoseconds: 500_000_000), validateTokenResult())
             CNLog.i("토큰 유효함")
+            
             await send(.tokenIsValid)
           } catch {
             CNLog.i("토큰 유효하지 않음")
+            
             await send(.tokenIsNotValid)
           }
         }
@@ -81,8 +86,5 @@ public struct SplashCore: Reducer {
       }
     }
   }
-}
-
-public extension SplashCore {
 }
 
