@@ -34,18 +34,16 @@ final class UICoordinator: Reducer {
     Reduce { state, action in
       switch action {
       case .addTokenExpirationObserver:
+        // Use publisher to handle continuous notifications
         return .publisher {
-          Future { callback in
-            NotificationCenter.default
-              .publisher(for: .tokenExpired)
-              .sink { _ in
-                callback(.success(.handleTokenExpiration))
-              }
-              .store(in: &self.cancellables)
-          }
-         }
+          NotificationCenter.default
+            .publisher(for: .tokenExpired)
+            .map { _ in Action.handleTokenExpiration }
+            
+        }
         
       case .handleTokenExpiration:
+        // Handle token expiration (e.g., navigate to login, refresh token)
         return .none
       }
     }
