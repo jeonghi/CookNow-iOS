@@ -16,9 +16,18 @@ import Domain
 public struct IngredientBoxView: BaseFeatureViewType {
   
   public typealias Core = IngredientBoxCore
+  public typealias Route = Core.Route
+  
   public let store: StoreOf<Core>
   
   @ObservedObject public var viewStore: ViewStore<ViewState, CoreAction>
+  @Namespace var animationNamespace: Namespace.ID
+  @FocusState var focused: Bool
+  @State private var isSearchMode: Bool = false
+  
+  enum AnimationNameSpace {
+    case searchBar
+  }
   
   public struct ViewState: Equatable {
     var isLoading: Bool
@@ -26,11 +35,16 @@ public struct IngredientBoxView: BaseFeatureViewType {
     var selectedCategory: IngredientCategory?
     var categories: [IngredientCategory]
     var currCategoryIngredients: [Ingredient]
-    var ingredientBox: [Ingredient]
+    var selectedingredientBox: Set<Ingredient.ID>
+    var selectedIngredients: [Ingredient]
+    var allIngredients: [Ingredient]
+    var route: Route?
     var showingSheet: Bool
-    var showingNext: Bool
     var ingredientBoxActive: Bool {
-      !ingredientBox.isEmpty
+      !selectedingredientBox.isEmpty
+    }
+    var searchResult: [Ingredient] {
+      allIngredients.filter { $0.name.contains(searchText) }
     }
     
     public init(state: CoreState) {
@@ -39,9 +53,11 @@ public struct IngredientBoxView: BaseFeatureViewType {
       selectedCategory = state.selectedCategory
       categories = state.categories
       currCategoryIngredients = state.currCategoryIngredients
-      ingredientBox = state.selectedingredientBox
+      selectedingredientBox = state.selectedingredientBox
+      selectedIngredients = state.selectedingredients
+      allIngredients = state.ingredients
       showingSheet = state.showingSheet
-      showingNext = state.showingNext
+      route = state.route
     }
   }
   
@@ -91,47 +107,53 @@ extension IngredientBoxView {
 extension IngredientBoxView: View {
   
   public var body: some View {
-    VStack(spacing: 0) {
-      VStack(spacing: 20) {
-        ZStack(alignment: .bottom) {
-          Image.asset(.ingredientBoxHomeHeaderBackground)
-            .resizable()
-            .scaledToFit()
-          VStack(alignment: .leading, spacing: Metric.headerSpacing) {
-            infoLabel()
-            searchBar()
-          } //: VStack
-          .padding(.horizontal, Metric.horizontalPadding)
-        } //: ZStask
-        ingredientSegmentControl()
-      } //: VStack
-      .background(Color.asset(.white))
-      
-      ScrollView(.vertical, showsIndicators: true) {
-        ingredientGridView()
-          .padding(.vertical, Metric.gridVerticalPadding)
-        makeIngredientBox().opacity(0)
-      }
-    }
-    .applyIf(viewStore.ingredientBoxActive) {
-     $0.overlay(alignment: .bottom) {
-        Button(action: {
-          viewStore.send(.ingredientBoxTapped)
-        }) {
-          makeIngredientBox()
+    ZStack {
+      VStack(spacing: 0) {
+        VStack(spacing: 20) {
+          ZStack(alignment: .bottom) {
+            Image.asset(.ingredientBoxHomeHeaderBackground)
+              .resizable()
+              .scaledToFit()
+            VStack(alignment: .leading, spacing: Metric.headerSpacing) {
+              infoLabel()
+              searchBar()
+                .onChange(of: focused) { oldValue, newValue in
+                  if newValue {
+                    isSearchMode = newValue
+                  }
+                }
+            } //: VStack
+            .padding(.horizontal, Metric.horizontalPadding)
+          } //: ZStask
+          ingredientSegmentControl()
+        } //: VStack
+        .background(Color.asset(.white))
+        
+        ScrollView(.vertical, showsIndicators: true) {
+          ingredientGridView()
+            .padding(.vertical, Metric.gridVerticalPadding)
+          makeIngredientBox().opacity(0)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
       }
-    }
-    .navigationDestination(isPresented: viewStore.binding(get: \.showingNext, send: CoreAction.showingNext)) {
-      IfLetStore(inputFormStore) { store in
-        IngredientInputFormView(store)
+      .applyIf(viewStore.ingredientBoxActive) {
+        $0.overlay(alignment: .bottom) {
+          Button(action: {
+            viewStore.send(.ingredientBoxTapped)
+          }) {
+            makeIngredientBox()
+          }
+          .padding(.horizontal, 20)
+          .padding(.bottom, 20)
+        }
+      }
+      .background(Color.asset(.bgMain))
+      .ignoresSafeArea(edges: [.horizontal, .top])
+      
+      if(isSearchMode) {
+        searchModeView()
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color.asset(.bgMain))
-    .ignoresSafeArea(edges: [.horizontal, .top])
     .kerning(Metric.kerning) // 자간 -0.6
     .cnLoading(viewStore.isLoading)
     .onLoad {
@@ -139,6 +161,16 @@ extension IngredientBoxView: View {
     }
     .cnSheet(isPresented: viewStore.binding(get: \.showingSheet, send: CoreAction.showingSheet)) {
       makeBottomSheet()
+    }
+    .toolbar(isSearchMode ? .hidden : .visible, for: .navigationBar)
+    .toolbar(isSearchMode ? .hidden : .visible, for: .tabBar)
+    .navigationDestination(item: viewStore.binding(get: \.route, send: CoreAction.setRoute)) { route in
+      switch route {
+      case .inputForm:
+        IfLetStore(inputFormStore) { store in
+          IngredientInputFormView(store)
+        }
+      }
     }
   }
 }
@@ -161,8 +193,10 @@ extension IngredientBoxView {
         send: CoreAction.updateSearchText
       ),
       placeholder: Metric.searchBarPlaceholder,
-      maxLength: Metric.searchBarMaxLength
+      maxLength: Metric.searchBarMaxLength,
+      isFocused: $focused
     )
+//    .matchedGeometryEffect(id: AnimationNameSpace.searchBar, in: animationNamespace)
   }
   
   @ViewBuilder
@@ -211,16 +245,12 @@ extension IngredientBoxView {
   @ViewBuilder
   private func ingredientGridItemView(item: Ingredient) -> some View {
     
-    let isContained: Bool = viewStore.ingredientBox.contains(item)
+    let isContained: Bool = viewStore.selectedingredientBox.contains(item.id)
     
     VStack(spacing: Metric.itemInnerSpacing) {
       
       Button(action: {
-        if(isContained) {
-          viewStore.send(.putOutIngredient(item))
-        } else {
-          viewStore.send(.putInIngredient(item))
-        }
+        viewStore.send(.putInOutIngredient(item))
       }){
         ZStack {
           Color.asset(.white)
@@ -228,6 +258,7 @@ extension IngredientBoxView {
             .aspectRatio(1, contentMode: .fit)
             .padding(2)
         }
+        .aspectRatio(1, contentMode: .fit)
         .overlay {
           Color.black.opacity(isContained ? 0.4 : 0.0)
         }
@@ -270,7 +301,7 @@ extension IngredientBoxView {
             .fill(Color.asset(.danger500))
             .frame(width: 20, height: 20)
             .overlay {
-              Text("\(viewStore.ingredientBox.count)")
+              Text("\(viewStore.selectedingredientBox.count)")
                 .foregroundStyle(Color.asset(.white))
                 .font(.asset(.bodyBold))
             }
@@ -301,6 +332,69 @@ extension IngredientBoxView {
   }
 }
 
+extension IngredientBoxView {
+  
+  private func searchModeView() -> some View {
+    VStack(spacing: 20) {
+      
+      HStack(spacing: 10) {
+        Button(action: {
+          isSearchMode = false
+          focused = false
+          viewStore.send(.updateSearchText(""))
+        }){
+          Image(systemName: "chevron.backward")
+            .renderingMode(.original)
+            .tint(Color.asset(.primary600))
+        }
+        searchBar()
+      }
+      .padding(.horizontal, Metric.horizontalPadding)
+      .padding(.top, 10)
+      
+      
+      ScrollView {
+        LazyVStack(spacing: 0) {
+          ForEach(viewStore.searchResult, id: \.self) { ingredient in
+            Button(action: {
+              viewStore.send(.putInOutIngredient(ingredient))
+            }) {
+              searchResultRow(for: ingredient)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 15)
+            }
+            .background(
+              viewStore.selectedingredientBox.contains(ingredient.id)
+              ? Color.asset(.primary100)
+              : Color.asset(.clear)
+            )
+          }
+        }
+      }
+      .vTop()
+    }
+    .background(Color.asset(.white))
+    .ignoresSafeArea(.keyboard)
+  }
+  
+  private func searchResultRow(for item: Ingredient) -> some View {
+    
+      HStack(spacing: 10) {
+        ZStack {
+          Color.clear
+          CNAsyncImage(item.imageUrl)
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .frame(width: 35, height: 35)
+        
+        Text(item.name)
+          .font(.asset(.bodyBold2))
+          .foregroundStyle(Color.asset(.gray800))
+          .hLeading()
+      }
+  }
+}
+
 // MARK: 시트 뷰
 extension IngredientBoxView {
   
@@ -316,7 +410,7 @@ extension IngredientBoxView {
       
       ScrollView(.vertical, showsIndicators: false) {
         makeBottomSheetGrid()
-//          .padding(.horizontal, Metric.bottomSheetScrollViewHorizontalPadding)
+        //          .padding(.horizontal, Metric.bottomSheetScrollViewHorizontalPadding)
       }
       .frame(height: Metric.bottomSheetScrollViewHeight)
       .frame(maxWidth: .infinity)
@@ -337,14 +431,14 @@ extension IngredientBoxView {
         }
         .buttonStyle(StateButtonStyle.primary(.default))
       } //: HStack
-//      .padding(.horizontal, Metric.bottomSheetButtonHorizontalPadding)
+      //      .padding(.horizontal, Metric.bottomSheetButtonHorizontalPadding)
       .padding(.vertical, Metric.bottomSheetButtonVerticalPadding)
     }
   }
   
   private func makeBottomSheetGrid() -> some View {
     LazyVGrid(columns: [GridItem].init(repeating: .init(), count: 4)) {
-      ForEach(viewStore.ingredientBox, id: \.self) {
+      ForEach(viewStore.selectedIngredients, id: \.self) {
         makeBottomSheetGridItem(for: $0)
       }
     }
@@ -352,7 +446,11 @@ extension IngredientBoxView {
   
   private func makeBottomSheetGridItem(for item: Ingredient) -> some View {
     VStack(spacing: 5) {
-      CNAsyncImage(item.imageUrl)
+      ZStack {
+        Color.asset(.clear)
+        CNAsyncImage(item.imageUrl)
+      }
+      .aspectRatio(1, contentMode: .fit)
       Text(item.name)
         .font(.asset(.bodyBold1))
         .foregroundStyle(Color.asset(.gray800))
